@@ -1,6 +1,20 @@
 import { rest } from 'msw'
 
 export const handlers = [
+  rest.get('http://localhost:3000/api/items/:id', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        id: req.params.id,
+        name: 'Algum item top',
+        description:
+          'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quidem.  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quidem.',
+        image: 'https://via.placeholder.com/800',
+        price: 100,
+        quantity: 1,
+      })
+    )
+  }),
   rest.get('http://localhost:3000/api/items', (_, res, ctx) => {
     return res(
       ctx.status(200),
