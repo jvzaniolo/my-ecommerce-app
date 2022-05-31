@@ -41,7 +41,7 @@ const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query
-  const { data } = await api.get(`/api/items/${id}`)
+  const { data } = await api.get(`/items/${id}`)
 
   return {
     props: { item: data || {} },

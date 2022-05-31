@@ -17,7 +17,7 @@ const Home: NextPage<{ items: ItemType[] }> = ({ items }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await api.get('/api/items')
+  const { data } = await api.get('/items')
 
   return {
     props: {
