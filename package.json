@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "server": "json-server --watch db.json --port 3333"
+    "server": "json-server --watch src/mocks/server.json --port 3333"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.1.2",
