@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Item should render an item with initial props 1`] = `
+<div>
+  <a
+    class="css-b5xe08"
+    href="/items/slug"
+  >
+    <img
+      alt="name"
+      class="chakra-image css-ydteuf"
+      src="image"
+    />
+    <div
+      class="css-1g8wnvq"
+    >
+      <h2
+        class="chakra-heading css-0"
+      >
+        name
+      </h2>
+      <p
+        class="chakra-text css-1cp6yu0"
+      >
+        description
+      </p>
+      <p
+        class="chakra-text css-1hwfm6p"
+      >
+        $20.00
+      </p>
+    </div>
+  </a>
+</div>
+`;
