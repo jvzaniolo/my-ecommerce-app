@@ -1,4 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
   Button,
@@ -11,8 +12,17 @@ import {
 } from '@chakra-ui/react'
 import { api } from '~/services/axios'
 import type { Item } from '~/types/item'
+import { addToCart } from '~/handlers/cart'
 
 const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
+  const router = useRouter()
+
+  async function handleAddToCart() {
+    await addToCart(item)
+
+    router.push('/cart')
+  }
+
   return (
     <Flex gap="4">
       <Img src={item.image} alt={item.name} />
@@ -30,7 +40,7 @@ const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
         <Divider />
         <Text>{item.description}</Text>
 
-        <Button mt="8" gap="3">
+        <Button mt="8" gap="3" onClick={handleAddToCart}>
           <Icon as={MdOutlineAddShoppingCart} />
           Add to cart
         </Button>
