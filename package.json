@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "jest --watch",
     "server": "node server.js"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "react-icons": "^4.4.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@types/json-server": "^0.14.4",
     "@types/node": "17.0.36",
@@ -30,6 +32,8 @@
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-testing-library": "^5.5.1",
+    "jest": "^28.1.0",
+    "jest-environment-jsdom": "^28.1.0",
     "json-server": "^0.17.0",
     "typescript": "4.7.2"
   }
