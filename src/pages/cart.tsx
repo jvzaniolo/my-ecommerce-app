@@ -57,9 +57,9 @@ const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
         </Heading>
 
         <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
-          {cart.length > 0 ? (
-            <Stack as="ul" flex="2" spacing="4">
-              {cart.map(item => (
+          <Stack as="ul" flex="2" spacing="4">
+            {cart.length > 0 ? (
+              cart.map(item => (
                 <Flex
                   key={item.id}
                   as="li"
@@ -103,11 +103,11 @@ const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
                     </Flex>
                   </Flex>
                 </Flex>
-              ))}
-            </Stack>
-          ) : (
-            <Text>Your cart is empty</Text>
-          )}
+              ))
+            ) : (
+              <Text>Your cart is empty</Text>
+            )}
+          </Stack>
 
           <Flex
             p="4"
