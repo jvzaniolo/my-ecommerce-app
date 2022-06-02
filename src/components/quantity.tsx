@@ -8,7 +8,7 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 
-function Quantity({
+export function Quantity({
   value,
   onChange,
   maxQuantity,
@@ -41,19 +41,19 @@ function Quantity({
           icon={<Icon as={MdRemove} />}
           aria-label="Decrease"
           onClick={onDecrease}
+          data-testid="decrease-quantity"
         />
       </InputLeftElement>
-      <Input type="number" name="quantity" value={value} />
+      <Input type="number" name="quantity" value={value} onChange={() => {}} />
       <InputRightElement>
         <IconButton
           size="sm"
           icon={<Icon as={MdAdd} />}
           aria-label="Increase"
           onClick={onIncrease}
+          data-testid="increase-quantity"
         />
       </InputRightElement>
     </InputGroup>
   )
 }
-
-export default Quantity
