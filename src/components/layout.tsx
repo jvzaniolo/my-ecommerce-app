@@ -4,11 +4,11 @@ import { Box, Flex, Heading, Icon, IconButton } from '@chakra-ui/react'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <Flex h="100vh" direction="column">
-      <Flex as="header" shadow="base">
+    <>
+      <Box as="header" shadow="base">
         <Flex
           p="3"
-          w="container.xl"
+          maxW="container.xl"
           mx="auto"
           align="center"
           justify="space-between"
@@ -23,11 +23,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             />
           </Link>
         </Flex>
-      </Flex>
+      </Box>
 
-      <Box as="main" p="4" h="full" w="container.xl" mx="auto">
+      <Box as="main" p="4" h="full" maxW="container.xl" mx="auto">
         {children}
       </Box>
-    </Flex>
+    </>
   )
 }
