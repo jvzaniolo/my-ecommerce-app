@@ -18,7 +18,7 @@ function Quantity({
   maxQuantity: number
 }) {
   function onIncrease() {
-    if (value <= maxQuantity) {
+    if (value < maxQuantity) {
       onChange(value + 1)
     } else {
       onChange(value)
