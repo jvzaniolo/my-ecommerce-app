@@ -5,9 +5,9 @@
       "slug": "calca-de-moletom-imperial-preta-columbus",
       "name": "Calça De Moletom Imperial Preta Columbus",
       "description": "A calça de moletom da Imperial Esports é do jeito que nossos jogadores gostam: com alto padrão de conforto para o dia-a-dia, perfeita para jogar aquela partida que pede concentração total e não pode ser influenciada por qualquer tipo de desconforto.",
-      "price": 211.0,
+      "price": 211,
       "image": "https://static.cdnlive.com.br/uploads/602/produto/16540946765310_detalhe.jpg",
-      "quantity": 100
+      "stock": 100
     },
     {
       "id": "2",
@@ -16,7 +16,7 @@
       "description": "Sua Jersey será personalizada de acordo com o que for escrito. Serão consideradas as letras maiúsculas e minusculas.",
       "price": 179.9,
       "image": "https://static.cdnlive.com.br/uploads/602/produto/16540308307623_detalhe.jpg",
-      "quantity": 20
+      "stock": 20
     },
     {
       "id": "3",
@@ -25,27 +25,8 @@
       "description": "This is a description for Item 3",
       "price": 3.99,
       "image": "https://picsum.photos/200",
-      "quantity": 30
+      "stock": 30
     }
   ],
-  "cart": [
-    {
-      "id": "1",
-      "slug": "calca-de-moletom-imperial-preta-columbus",
-      "name": "Calça De Moletom Imperial Preta Columbus",
-      "description": "A calça de moletom da Imperial Esports é do jeito que nossos jogadores gostam: com alto padrão de conforto para o dia-a-dia, perfeita para jogar aquela partida que pede concentração total e não pode ser influenciada por qualquer tipo de desconforto.",
-      "price": 211.0,
-      "image": "https://static.cdnlive.com.br/uploads/602/produto/16540946765310_detalhe.jpg",
-      "quantity": 1
-    },
-    {
-      "id": "2",
-      "name": "Uniforme Imperial Oficial 2022",
-      "slug": "uniforme-imperial-oficial-2022",
-      "description": "Sua Jersey será personalizada de acordo com o que for escrito. Serão consideradas as letras maiúsculas e minusculas.",
-      "price": 179.9,
-      "image": "https://static.cdnlive.com.br/uploads/602/produto/16540308307623_detalhe.jpg",
-      "quantity": 1
-    }
-  ]
+  "cart": []
 }

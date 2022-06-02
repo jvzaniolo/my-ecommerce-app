@@ -17,7 +17,7 @@ server.post('/cart', (req, res) => {
     const response = router.db
       .get('cart')
       .find({ id: req.body.id })
-      .assign({ quantity: product.quantity + 1 })
+      .assign({ quantity: product.quantity + req.body.quantity })
       .write()
 
     res.status(200).jsonp(response)
