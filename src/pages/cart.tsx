@@ -1,7 +1,7 @@
+import { useState } from 'react'
 import type { GetServerSideProps, NextPage } from 'next'
 import NextLink from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
 import {
   Box,
   Breadcrumb,
@@ -19,7 +19,7 @@ import {
 import { api } from '~/services/axios'
 import type { Item } from '~/types/item'
 import { toUSCurrency } from '~/utils/format'
-import Quantity from '~/components/quantity'
+import { Quantity } from '~/components/quantity'
 
 const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
   const [cart, setCart] = useState(() => initialCartData)

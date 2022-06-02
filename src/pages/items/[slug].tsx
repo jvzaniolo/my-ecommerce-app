@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react'
 import { api } from '~/services/axios'
 import type { Item as ItemType } from '~/types/item'
-import Quantity from '~/components/quantity'
+import { Quantity } from '~/components/quantity'
 
 const Item: NextPage<{ item: ItemType }> = ({ item }) => {
   const router = useRouter()
