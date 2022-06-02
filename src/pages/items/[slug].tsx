@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import type { GetServerSideProps, NextPage } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
+  Box,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -15,15 +18,17 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { api } from '~/services/axios'
-import type { Item } from '~/types/item'
+import type { Item as ItemType } from '~/types/item'
+import Quantity from '~/components/quantity'
 
-const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
+const Item: NextPage<{ item: ItemType }> = ({ item }) => {
   const router = useRouter()
+  const [quantity, setQuantity] = useState(1)
 
-  async function handleAddToCart() {
+  async function onAddToCart() {
     await api.post('/cart', {
       ...item,
-      quantity: 1,
+      quantity,
     })
 
     router.push('/cart')
@@ -42,9 +47,11 @@ const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
         </BreadcrumbItem>
       </Breadcrumb>
 
-      <Flex gap="4">
-        <Img src={item.image} alt={item.name} />
-        <Flex gap="3" direction="column">
+      <Flex gap="14" wrap="wrap">
+        <Box flex="1" pos="relative" h="xl" minW="xs">
+          <Img as={Image} layout="fill" src={item.image} alt={item.name} />
+        </Box>
+        <Flex flex="1" gap="3" direction="column">
           <Flex justify="space-between">
             <Heading>{item.name}</Heading>
             <Heading>
@@ -54,14 +61,22 @@ const ItemDetails: NextPage<{ item: Item }> = ({ item }) => {
               }).format(item.price)}
             </Heading>
           </Flex>
-          <Text>Quantity: {item.quantity}</Text>
+          <Text>In-Stock: {item.stock}</Text>
           <Divider />
           <Text>{item.description}</Text>
 
-          <Button mt="8" gap="3" onClick={handleAddToCart}>
-            <Icon as={MdOutlineAddShoppingCart} />
-            Add to cart
-          </Button>
+          <Box mt="8">
+            <Quantity
+              value={quantity}
+              onChange={value => setQuantity(value)}
+              maxQuantity={item.stock}
+            />
+
+            <Button w="full" mt="3" onClick={onAddToCart}>
+              <Icon as={MdOutlineAddShoppingCart} />
+              Add to cart
+            </Button>
+          </Box>
         </Flex>
       </Flex>
     </>
@@ -81,4 +96,4 @@ export const getServerSideProps: GetServerSideProps = async context => {
   }
 }
 
-export default ItemDetails
+export default Item

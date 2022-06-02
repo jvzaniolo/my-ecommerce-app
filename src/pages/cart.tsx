@@ -1,5 +1,6 @@
 import type { GetServerSideProps, NextPage } from 'next'
-import Link from 'next/link'
+import NextLink from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import {
   Box,
@@ -13,9 +14,12 @@ import {
   Img,
   Stack,
   Text,
+  Link,
 } from '@chakra-ui/react'
 import { api } from '~/services/axios'
 import type { Item } from '~/types/item'
+import { toUSCurrency } from '~/utils/format'
+import Quantity from '~/components/quantity'
 
 const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
   const [cart, setCart] = useState(() => initialCartData)
@@ -24,70 +28,86 @@ const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
     return acc + item.price * item.quantity
   }, 0)
 
-  function handleRemoveItem(id: string) {
+  function onRemoveItem(id: string) {
     setCart(cart.filter(item => item.id !== id))
     api.delete(`/cart/${id}`)
+  }
+
+  function onChangeQuantity(id: string, quantity: number) {
+    setCart(cart.map(item => (item.id === id ? { ...item, quantity } : item)))
+    api.patch(`/cart/${id}`, { quantity })
   }
 
   return (
     <>
       <Breadcrumb mt="3" mb="6">
         <BreadcrumbItem>
-          <Link href="/" passHref>
+          <NextLink href="/" passHref>
             <BreadcrumbLink>Home</BreadcrumbLink>
-          </Link>
+          </NextLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
           <BreadcrumbLink>Cart</BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
+
       <Box>
         <Heading as="h1" size="xl">
           Cart
         </Heading>
 
-        <Stack direction={['column', 'column', 'row']} spacing="10" mt="4">
-          <Stack as="ul" flex="2" spacing="4">
-            {cart.length > 0 ? (
-              cart.map(item => (
-                <Flex key={item.id} as="li" shadow="md" borderRightRadius="md">
-                  <Img
-                    src={item.image}
-                    alt={item.name}
-                    borderLeftRadius="md"
-                    w="64"
-                  />
-                  <Flex p="4" align="flex-start">
-                    <Flex h="full" direction="column" gap="2">
-                      <Heading as="h2" size="md">
+        <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
+          {cart.length > 0 ? (
+            <Stack as="ul" flex="2" spacing="4">
+              {cart.map(item => (
+                <Flex
+                  key={item.id}
+                  as="li"
+                  h="56"
+                  shadow="md"
+                  borderRightRadius="md"
+                >
+                  <Box pos="relative" flex="1">
+                    <Img
+                      as={Image}
+                      layout="fill"
+                      src={item.image}
+                      alt={item.name}
+                      borderLeftRadius="md"
+                    />
+                  </Box>
+                  <Flex p="4" h="full" direction="column" gap="2" flex="2">
+                    <NextLink href={`/items/${item.slug}`}>
+                      <Link size="md" fontWeight="bold" fontSize="xl">
                         {item.name}
-                      </Heading>
+                      </Link>
+                    </NextLink>
 
-                      <Text>{item.description}</Text>
-                      <Text>Quantity: {item.quantity}</Text>
+                    <Text noOfLines={3} title={item.description}>
+                      {item.description}
+                    </Text>
+                    <Quantity
+                      value={item.quantity}
+                      onChange={quantity => onChangeQuantity(item.id, quantity)}
+                      maxQuantity={item.stock}
+                    />
 
-                      <Flex justify="space-between" mt="auto">
-                        <Text fontWeight="bold">
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'USD',
-                          }).format(item.price)}
-                        </Text>
-                        <Button
-                          variant="link"
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          Remove
-                        </Button>
-                      </Flex>
+                    <Flex justify="space-between" mt="auto">
+                      <Text fontWeight="bold">{toUSCurrency(item.price)}</Text>
+                      <Button
+                        variant="link"
+                        onClick={() => onRemoveItem(item.id)}
+                      >
+                        Remove
+                      </Button>
                     </Flex>
                   </Flex>
                 </Flex>
-              ))
-            ) : (
-              <Text>Your cart is empty</Text>
-            )}
-          </Stack>
+              ))}
+            </Stack>
+          ) : (
+            <Text>Your cart is empty</Text>
+          )}
 
           <Flex
             p="4"
@@ -97,41 +117,31 @@ const Cart: NextPage<{ initialCartData: Item[] }> = ({ initialCartData }) => {
             direction="column"
             borderRadius="md"
           >
-            <Stack flex="1" spacing="4">
+            <Stack spacing="4">
               <Heading size="lg">Order Summary</Heading>
               {cart.map(item => (
-                <Flex key={item.id} justify="space-between">
-                  <Box>
-                    <Text noOfLines={1}>{item.name}</Text>
-                    <Text ml="2" color="gray.500">
-                      Quantity: {item.quantity}
-                    </Text>
-                  </Box>
-                  <Text>
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                    }).format(item.price * item.quantity)}
-                  </Text>
-                </Flex>
+                <Box key={item.id}>
+                  <Text noOfLines={1}>{item.name}</Text>
+                  <Flex justify="space-between">
+                    <Text color="gray.500">Quantity: {item.quantity}</Text>
+                    <Text>{toUSCurrency(item.price * item.quantity)}</Text>
+                  </Flex>
+                </Box>
               ))}
               <Divider />
               <Flex justify="space-between">
                 <Text fontWeight="bold">Total:</Text>
-                <Text fontWeight="bold">
-                  {new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                  }).format(cartTotal)}
-                </Text>
+                <Text fontWeight="bold">{toUSCurrency(cartTotal)}</Text>
               </Flex>
             </Stack>
 
-            <Link href="/checkout" passHref>
-              <Button as="a">Checkout</Button>
-            </Link>
+            <NextLink href="/checkout" passHref>
+              <Button mt="auto" as="a" w="full">
+                Checkout
+              </Button>
+            </NextLink>
           </Flex>
-        </Stack>
+        </Flex>
       </Box>
     </>
   )
