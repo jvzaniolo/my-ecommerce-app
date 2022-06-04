@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest --watch",
-    "server": "node src/data/server.js"
+    "server": "node data/server.js"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.1.2",
