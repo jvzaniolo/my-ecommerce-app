@@ -1,18 +1,15 @@
+import { SWRConfig } from 'swr'
 import type { GetServerSideProps, NextPage } from 'next'
-import { Flex, Text } from '@chakra-ui/react'
 import { api } from '~/services/axios'
-import { Item } from '~/components/item'
-import type { Item as ItemType } from '~/types/item'
+import { Items } from '~/components/items'
 
-const Home: NextPage<{ items: ItemType[] }> = ({ items }) => {
+const Home: NextPage<{ fallback: { [key: string]: unknown | undefined } }> = ({
+  fallback,
+}) => {
   return (
-    <Flex gap="4" flexWrap="wrap">
-      {items.length > 0 ? (
-        items.map(item => <Item key={item.id} {...item} />)
-      ) : (
-        <Text>There are no items yet.</Text>
-      )}
-    </Flex>
+    <SWRConfig value={{ fallback }}>
+      <Items />
+    </SWRConfig>
   )
 }
 
@@ -21,7 +18,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   return {
     props: {
-      items: data || [],
+      fallback: {
+        '/items': data,
+      },
     },
   }
 }
