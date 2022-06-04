@@ -1,7 +1,8 @@
-import type { GetServerSideProps, NextPage } from 'next'
 import { SWRConfig } from 'swr'
 import { api } from '~/services/axios'
 import { Cart as CartComponent } from '~/components/cart'
+
+import type { GetServerSideProps, NextPage } from 'next'
 import type { Fallback } from '~/types/swr'
 
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
