@@ -1,7 +1,8 @@
 import type { NextPage } from 'next'
 
-import { Heading } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
+import { Box, Flex, Heading } from '@chakra-ui/react'
+import OrderSummary from '~/components/order-summary'
 
 const CheckoutPage: NextPage = () => {
   const { cache } = useSWRConfig()
@@ -13,6 +14,12 @@ const CheckoutPage: NextPage = () => {
   return (
     <>
       <Heading size="lg">Checkout</Heading>
+
+      <Flex>
+        <Box flex="2">Hello</Box>
+
+        <OrderSummary />
+      </Flex>
     </>
   )
 }
