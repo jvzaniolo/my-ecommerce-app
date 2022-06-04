@@ -1,12 +1,11 @@
 import { SWRConfig } from 'swr'
-import type { GetServerSideProps, NextPage } from 'next'
 import { api } from '~/services/axios'
 import { Items } from '~/components/items'
+
+import type { GetServerSideProps, NextPage } from 'next'
 import type { Fallback } from '~/types/swr'
 
-const Home: NextPage<{ fallback: Fallback }> = ({
-  fallback,
-}) => {
+const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   return (
     <SWRConfig value={{ fallback }}>
       <Items />
