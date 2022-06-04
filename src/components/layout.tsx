@@ -10,12 +10,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <Box as="header" shadow="base">
         <Flex
           p="3"
-          maxW="container.xl"
           mx="auto"
+          maxW="container.xl"
           align="center"
           justify="space-between"
         >
-          <Heading size="sm">My E-Commerce App</Heading>
+          <Link href="/" passHref>
+            <Heading as="a" size="sm">
+              My E-Commerce App
+            </Heading>
+          </Link>
 
           <Link href="/cart" passHref>
             <IconButton
