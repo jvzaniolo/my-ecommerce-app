@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { MdOutlineShoppingCart } from 'react-icons/md'
 import { Box, Flex, Heading, Icon, IconButton } from '@chakra-ui/react'
 
-export function Layout({ children }: { children: React.ReactNode }) {
+import type { ReactNode } from 'react'
+
+export function Layout({ children }: { children: ReactNode }) {
   return (
     <>
       <Box as="header" shadow="base">
