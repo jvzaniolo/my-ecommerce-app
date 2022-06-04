@@ -72,17 +72,6 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
   return (
     <>
-      <Breadcrumb mt="3" mb="6">
-        <BreadcrumbItem>
-          <NextLink href="/" passHref>
-            <BreadcrumbLink>Home</BreadcrumbLink>
-          </NextLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem isCurrentPage>
-          <BreadcrumbLink>Cart</BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
-
       <Box>
         <Heading as="h1" size="xl">
           Cart
