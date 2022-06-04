@@ -1,8 +1,10 @@
 import type { GetServerSideProps, NextPage } from 'next'
+import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 
 import Image from 'next/image'
 import NextLink from 'next/link'
+import useSWR, { mutate } from 'swr'
 import {
   Box,
   Breadcrumb,
@@ -17,17 +19,60 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import api from '~/services/axios'
-import useCart from '~/hooks/cart'
 import Quantity from '~/components/quantity'
+import api, { fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { cart, removeItem, updateItemQuantity } = useCart({ fallback })
+  const { data: cart } = useSWR<Item[]>('/cart', fetcher, { fallback })
 
   const cartTotal = cart?.reduce((acc, item) => {
     return acc + item.price * item.quantity
   }, 0)
+
+  async function onUpdateItemQuantity(id: string, quantity: number) {
+    if (!cart) return
+
+    const cartWithUpdatedQuantity = cart.map(item =>
+      item.id === id ? { ...item, quantity } : item
+    )
+
+    mutate(
+      '/cart',
+      async () => {
+        await api.patch(`/cart/${id}`, { quantity })
+
+        return cartWithUpdatedQuantity
+      },
+      {
+        optimisticData: cartWithUpdatedQuantity,
+        rollbackOnError: true,
+        revalidate: false,
+        populateCache: true,
+      }
+    )
+  }
+
+  async function onRemoveCartItem(id: string) {
+    if (!cart) return
+
+    const filteredCart = cart.filter(item => item.id !== id)
+
+    mutate(
+      '/cart',
+      async () => {
+        await api.delete(`/cart/${id}`)
+
+        return filteredCart
+      },
+      {
+        optimisticData: filteredCart,
+        rollbackOnError: true,
+        revalidate: false,
+        populateCache: true,
+      }
+    )
+  }
 
   return (
     <>
@@ -80,7 +125,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
                     <Quantity
                       value={item.quantity}
                       onChange={quantity =>
-                        updateItemQuantity(item.id, quantity)
+                        onUpdateItemQuantity(item.id, quantity)
                       }
                       maxQuantity={item.stock}
                     />
@@ -89,7 +134,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
                       <Text fontWeight="bold">{toUSCurrency(item.price)}</Text>
                       <Button
                         variant="link"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => onRemoveCartItem(item.id)}
                       >
                         Remove
                       </Button>

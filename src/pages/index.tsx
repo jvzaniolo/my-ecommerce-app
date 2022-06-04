@@ -3,8 +3,9 @@ import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import useSWR from 'swr'
-import { Flex, Heading, Img, Text } from '@chakra-ui/react'
+import { Box, Flex, Heading, Img, Text } from '@chakra-ui/react'
 import api, { fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
@@ -17,12 +18,15 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         items?.map(item => (
           <Link key={item.id} href={`/items/${item.slug}`} passHref>
             <Flex as="a" direction="column" shadow="md" maxW="72">
-              <Img
-                src={item.image}
-                alt={item.name}
-                w="72"
-                borderTopRadius="md"
-              />
+              <Box h="64" pos="relative">
+                <Img
+                  as={Image}
+                  src={item.image}
+                  alt={item.name}
+                  layout="fill"
+                  borderTopRadius="md"
+                />
+              </Box>
               <Flex
                 p="3"
                 gap="3"

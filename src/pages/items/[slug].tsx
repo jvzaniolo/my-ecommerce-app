@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useSWRConfig } from 'swr'
+import useSWR, { mutate, useSWRConfig } from 'swr'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
   Box,
@@ -20,15 +20,15 @@ import {
   Img,
   Text,
 } from '@chakra-ui/react'
-import useCart from '~/hooks/cart'
 import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
+import api, { fetcher } from '~/services/axios'
 
 const ItemPage: NextPage = () => {
   const router = useRouter()
   const { slug } = router.query
   const { cache } = useSWRConfig()
-  const { addItem, isValidating } = useCart()
+  const { isValidating } = useSWR('/cart', fetcher)
   const [quantity, setQuantity] = useState(1)
 
   const item: ItemType = cache
@@ -38,7 +38,9 @@ const ItemPage: NextPage = () => {
   if (!item) return <>Loading...</>
 
   async function onAddToCart() {
-    await addItem({ ...item, quantity })
+    await mutate('/cart', () => {
+      api.post('/cart', { ...item, quantity })
+    })
     router.push('/cart')
   }
 
