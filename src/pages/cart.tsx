@@ -1,14 +1,14 @@
-import { SWRConfig } from 'swr'
-import { api } from '~/services/axios'
-import { Cart as CartComponent } from '~/components/cart'
-
 import type { GetServerSideProps, NextPage } from 'next'
 import type { Fallback } from '~/types/swr'
 
-const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+import { SWRConfig } from 'swr'
+import api from '~/services/axios'
+import Cart from '~/components/cart'
+
+const CartPage: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   return (
     <SWRConfig value={{ fallback }}>
-      <CartComponent />
+      <Cart />
     </SWRConfig>
   )
 }
@@ -25,4 +25,4 @@ export const getServerSideProps: GetServerSideProps = async () => {
   }
 }
 
-export default Cart
+export default CartPage

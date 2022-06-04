@@ -14,11 +14,11 @@ import {
   Text,
   Link,
 } from '@chakra-ui/react'
-import { useCart } from '~/hooks/cart'
+import Quantity from '~/components/quantity'
+import useCart from '~/hooks/cart'
 import { toUSCurrency } from '~/utils/format'
-import { Quantity } from '~/components/quantity'
 
-export function Cart() {
+const Cart = () => {
   const { cart, removeItem, updateItemQuantity } = useCart()
 
   const cartTotal = cart?.reduce((acc, item) => {
@@ -135,3 +135,5 @@ export function Cart() {
     </>
   )
 }
+
+export default Cart

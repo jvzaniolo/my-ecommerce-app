@@ -1,11 +1,11 @@
+import type { Item as ItemType } from '~/types/item'
+
 import Link from 'next/link'
 import useSWR from 'swr'
 import { Flex, Heading, Img, Text } from '@chakra-ui/react'
 import { toUSCurrency } from '~/utils/format'
 
-import type { Item as ItemType } from '~/types/item'
-
-export function Items() {
+const Items = () => {
   const { data: items } = useSWR<ItemType[]>('/items')
 
   return (
@@ -42,3 +42,5 @@ export function Items() {
     </Flex>
   )
 }
+
+export default Items

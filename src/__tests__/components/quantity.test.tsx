@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { Quantity } from '~/components/quantity'
+import Quantity from '~/components/quantity'
 
 describe('Quantity', () => {
   it('should render the quantity with initial props', () => {

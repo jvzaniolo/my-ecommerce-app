@@ -1,8 +1,9 @@
-import useSWR, { useSWRConfig } from 'swr'
-import { api } from '~/services/axios'
 import type { Item } from '~/types/item'
 
-export const useCart = () => {
+import useSWR, { useSWRConfig } from 'swr'
+import api from '~/services/axios'
+
+const useCart = () => {
   const { mutate } = useSWRConfig()
   const {
     data: cart,
@@ -71,3 +72,5 @@ export const useCart = () => {
     updateItemQuantity,
   }
 }
+
+export default useCart

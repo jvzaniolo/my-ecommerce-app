@@ -1,13 +1,13 @@
-import { Heading } from '@chakra-ui/react'
-
 import type { NextPage } from 'next'
 
-const Checkout: NextPage = () => {
+import { Heading } from '@chakra-ui/react'
+
+const CheckoutPage: NextPage = () => {
   return (
     <div>
-      <Heading size="lg">Checkout</Heading>
+      <Heading size="lg">CheckoutPage</Heading>
     </div>
   )
 }
 
-export default Checkout
+export default CheckoutPage

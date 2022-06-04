@@ -1,3 +1,6 @@
+import type { NextPage } from 'next'
+import type { Item as ItemType } from '~/types/item'
+
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -17,18 +20,15 @@ import {
   Img,
   Text,
 } from '@chakra-ui/react'
-import { Quantity } from '~/components/quantity'
-import { useCart } from '~/hooks/cart'
+import useCart from '~/hooks/cart'
+import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 
-import type { NextPage } from 'next'
-import type { Item as ItemType } from '~/types/item'
-
-const Item: NextPage = () => {
+const ItemPage: NextPage = () => {
   const router = useRouter()
   const { slug } = router.query
   const { cache } = useSWRConfig()
-  const { addItem } = useCart()
+  const { addItem, isValidating } = useCart()
   const [quantity, setQuantity] = useState(1)
 
   const item: ItemType = cache
@@ -75,8 +75,13 @@ const Item: NextPage = () => {
               maxQuantity={item.stock}
             />
 
-            <Button w="full" mt="3" onClick={onAddToCart}>
-              <Icon as={MdOutlineAddShoppingCart} />
+            <Button
+              w="full"
+              mt="3"
+              onClick={onAddToCart}
+              isLoading={isValidating}
+            >
+              <Icon mr="2" as={MdOutlineAddShoppingCart} />
               Add to cart
             </Button>
           </Box>
@@ -86,4 +91,4 @@ const Item: NextPage = () => {
   )
 }
 
-export default Item
+export default ItemPage

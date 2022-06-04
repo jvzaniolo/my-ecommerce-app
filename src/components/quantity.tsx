@@ -8,15 +8,13 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 
-export function Quantity({
-  value,
-  onChange,
-  maxQuantity,
-}: {
+interface QuantityProps {
   value: number
-  onChange(value: number): void
+  onChange: (value: number) => any
   maxQuantity: number
-}) {
+}
+
+const Quantity = ({ value, onChange, maxQuantity }: QuantityProps) => {
   function onIncrease() {
     if (value < maxQuantity) {
       onChange(value + 1)
@@ -57,3 +55,5 @@ export function Quantity({
     </InputGroup>
   )
 }
+
+export default Quantity

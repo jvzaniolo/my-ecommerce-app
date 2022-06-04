@@ -1,10 +1,10 @@
+import type { ReactNode } from 'react'
+
 import Link from 'next/link'
 import { MdOutlineShoppingCart } from 'react-icons/md'
 import { Box, Flex, Heading, Icon, IconButton } from '@chakra-ui/react'
 
-import type { ReactNode } from 'react'
-
-export function Layout({ children }: { children: ReactNode }) {
+const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <Box as="header" shadow="base">
@@ -33,3 +33,5 @@ export function Layout({ children }: { children: ReactNode }) {
     </>
   )
 }
+
+export default Layout
