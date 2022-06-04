@@ -1,6 +1,5 @@
 import NextLink from 'next/link'
 import Image from 'next/image'
-import useSWR, { useSWRConfig } from 'swr'
 import {
   Box,
   Breadcrumb,
@@ -15,58 +14,16 @@ import {
   Text,
   Link,
 } from '@chakra-ui/react'
+import { useCart } from '~/hooks/cart'
 import { toUSCurrency } from '~/utils/format'
 import { Quantity } from '~/components/quantity'
-import { api, fetcher } from '~/services/axios'
-import { Item } from '~/types/item'
 
 export function Cart() {
-  const { mutate } = useSWRConfig()
-  const { data: cart } = useSWR<Item[]>('/cart', fetcher)
-
-  console.log({ cart })
+  const { cart, removeItem, updateItemQuantity } = useCart()
 
   const cartTotal = cart?.reduce((acc, item) => {
     return acc + item.price * item.quantity
   }, 0)
-
-  function onRemoveItem(id: string) {
-    const filteredCart = cart?.filter(item => item.id !== id)
-
-    mutate(
-      '/cart',
-      async () => {
-        await api.delete(`/cart/${id}`)
-        return filteredCart
-      },
-      {
-        optimisticData: filteredCart,
-        rollbackOnError: true,
-        revalidate: false,
-        populateCache: true,
-      }
-    )
-  }
-
-  function onChangeQuantity(id: string, quantity: number) {
-    const cartWithUpdatedQuantity = cart?.map(item =>
-      item.id === id ? { ...item, quantity } : item
-    )
-
-    mutate(
-      '/cart',
-      async () => {
-        await api.patch(`/cart/${id}`, { quantity })
-        return cartWithUpdatedQuantity
-      },
-      {
-        optimisticData: cartWithUpdatedQuantity,
-        rollbackOnError: true,
-        revalidate: false,
-        populateCache: true,
-      }
-    )
-  }
 
   return (
     <>
@@ -118,7 +75,9 @@ export function Cart() {
                     </Text>
                     <Quantity
                       value={item.quantity}
-                      onChange={quantity => onChangeQuantity(item.id, quantity)}
+                      onChange={quantity =>
+                        updateItemQuantity(item.id, quantity)
+                      }
                       maxQuantity={item.stock}
                     />
 
@@ -126,7 +85,7 @@ export function Cart() {
                       <Text fontWeight="bold">{toUSCurrency(item.price)}</Text>
                       <Button
                         variant="link"
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => removeItem(item.id)}
                       >
                         Remove
                       </Button>
