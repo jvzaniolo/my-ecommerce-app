@@ -12,6 +12,7 @@ export interface FormData {
     phone: string
   }
   billing: {
+    isSameAsShipping: boolean
     address: string
     secondaryAddress: string
     city: string
