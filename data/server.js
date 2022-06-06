@@ -28,6 +28,43 @@ server.post('/cart', (req, res) => {
   }
 })
 
+server.post('/orders', (req, res) => {
+  const cartData = router.db.get('cart').value()
+  const itemsData = router.db.get('items').value()
+
+  const total = cartData.reduce((acc, item) => {
+    return acc + item.price * item.quantity
+  }, 0)
+
+  req.body.items.forEach(item => {
+    const product = itemsData.find(product => product.id === item.id)
+
+    if (product) {
+      router.db
+        .get('items')
+        .find({ id: item.id })
+        .assign({ stock: product.stock - item.quantity })
+        .write()
+    }
+  })
+
+  router.db.get('cart').remove().write()
+
+  const order = {
+    id: Math.floor(Math.random() * 1000000),
+    email: req.body.shipping.email,
+    items: req.body.items,
+    total,
+    shipping: req.body.shipping,
+    billing: req.body.billing,
+    payment: req.body.payment,
+  }
+
+  router.db.get('orders').push(order).write()
+
+  res.status(201).jsonp(order)
+})
+
 server.use(router)
 server.listen(3333, () => {
   console.log('🚀 JSON Server is running')
