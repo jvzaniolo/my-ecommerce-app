@@ -1,10 +1,12 @@
 import type { GetServerSideProps, NextPage } from 'next'
+import type { SubmitHandler } from 'react-hook-form'
 import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 import type { FormData } from '~/types/checkout-form'
 
 import useSWR from 'swr'
-import { type SubmitHandler, useForm } from 'react-hook-form'
+import { useRouter } from 'next/router'
+import { useForm } from 'react-hook-form'
 import { Box, Button, Checkbox, Flex, Heading, Stack } from '@chakra-ui/react'
 import api, { fetcher } from '~/services/axios'
 import Input from '~/components/input'
@@ -12,11 +14,19 @@ import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: cart } = useSWR<Item[]>('/cart', fetcher, { fallback })
+  const router = useRouter()
+  const { data: cart, mutate } = useSWR<Item[]>('/cart', fetcher, { fallback })
   const { handleSubmit, register } = useForm<FormData>()
 
-  const onPurchase: SubmitHandler<FormData> = data => {
-    console.log(data)
+  const onPurchase: SubmitHandler<FormData> = async data => {
+    const { data: order } = await api.post('/orders', {
+      ...data,
+      items: cart,
+    })
+
+    mutate([])
+
+    router.push(`/purchase/${order.id}`)
   }
 
   return (
@@ -43,7 +53,12 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
             </Heading>
 
             <Flex direction="row" mt="3">
-              <Checkbox defaultChecked={true}>Use same as Shipping</Checkbox>
+              <Checkbox
+                defaultChecked={true}
+                {...register('billing.isSameAsShipping')}
+              >
+                Use same as Shipping
+              </Checkbox>
             </Flex>
           </Flex>
 
