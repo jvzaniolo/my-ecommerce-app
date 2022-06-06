@@ -13,40 +13,42 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const { data: items } = useSWR<Item[]>('/items', fetcher, fallback)
 
   return (
-    <Flex gap="4" flexWrap="wrap">
-      {items && items.length > 0 ? (
-        items?.map(item => (
-          <Link key={item.id} href={`/items/${item.slug}`} passHref>
-            <Flex as="a" direction="column" shadow="md" maxW="72">
-              <Box h="64" pos="relative">
-                <Img
-                  as={Image}
-                  src={item.image}
-                  alt={item.name}
-                  layout="fill"
-                  borderTopRadius="md"
-                />
-              </Box>
-              <Flex
-                p="3"
-                gap="3"
-                flex="1"
-                direction="column"
-                borderBottomRadius="md"
-              >
-                <Heading size="sm">{item.name}</Heading>
-                <Text noOfLines={3}>{item.description}</Text>
-                <Text mt="auto" fontWeight="bold">
-                  {toUSCurrency(item.price)}
-                </Text>
+    <Box>
+      <Flex gap="4" flexWrap="wrap">
+        {items && items.length > 0 ? (
+          items?.map(item => (
+            <Link key={item.id} href={`/items/${item.slug}`} passHref>
+              <Flex as="a" direction="column" shadow="md" maxW="72">
+                <Box h="64" pos="relative">
+                  <Img
+                    as={Image}
+                    src={item.image}
+                    alt={item.name}
+                    layout="fill"
+                    borderTopRadius="md"
+                  />
+                </Box>
+                <Flex
+                  p="3"
+                  gap="3"
+                  flex="1"
+                  direction="column"
+                  borderBottomRadius="md"
+                >
+                  <Heading size="sm">{item.name}</Heading>
+                  <Text noOfLines={3}>{item.description}</Text>
+                  <Text mt="auto" fontWeight="bold">
+                    {toUSCurrency(item.price)}
+                  </Text>
+                </Flex>
               </Flex>
-            </Flex>
-          </Link>
-        ))
-      ) : (
-        <Text>There are no items yet.</Text>
-      )}
-    </Flex>
+            </Link>
+          ))
+        ) : (
+          <Text>There are no items yet.</Text>
+        )}
+      </Flex>
+    </Box>
   )
 }
 
