@@ -1,11 +1,12 @@
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
+import type { Fallback } from '~/types/swr'
 import type { Item as ItemType } from '~/types/item'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import useSWR, { mutate, useSWRConfig } from 'swr'
+import useSWR, { mutate } from 'swr'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
   Box,
@@ -24,16 +25,18 @@ import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import api, { fetcher } from '~/services/axios'
 
-const Item: NextPage = () => {
+const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
   const { slug } = router.query
-  const { cache } = useSWRConfig()
+  const { data } = useSWR<[ItemType]>(
+    `/items/${slug}`,
+    () => fetcher(`/items?slug=${slug}`),
+    { fallback }
+  )
   const { isValidating } = useSWR('/cart', fetcher)
   const [quantity, setQuantity] = useState(1)
 
-  const item: ItemType = cache
-    .get('/items')
-    ?.find((item: ItemType) => item.slug === slug)
+  const item = data?.[0]
 
   if (!item) return <>Loading...</>
 
@@ -45,7 +48,7 @@ const Item: NextPage = () => {
   }
 
   return (
-    <>
+    <Box>
       <Breadcrumb mt="3" mb="6">
         <BreadcrumbItem>
           <Link href="/" passHref>
@@ -89,8 +92,21 @@ const Item: NextPage = () => {
           </Box>
         </Flex>
       </Flex>
-    </>
+    </Box>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async context => {
+  const { slug } = context.query
+  const { data } = await api.get(`/items?slug=${slug}`)
+
+  return {
+    props: {
+      fallback: {
+        [`/items/${slug}`]: data,
+      },
+    },
+  }
 }
 
 export default Item
