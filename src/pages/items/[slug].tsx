@@ -48,7 +48,7 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   }
 
   return (
-    <Box>
+    <Box w="full">
       <Breadcrumb mt="3" mb="6">
         <BreadcrumbItem>
           <Link href="/" passHref>

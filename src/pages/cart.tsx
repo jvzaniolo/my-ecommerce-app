@@ -71,79 +71,77 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   }
 
   return (
-    <>
-      <Box>
-        <Heading as="h1" size="xl">
-          Cart
-        </Heading>
+    <Box w="full">
+      <Heading as="h1" size="xl">
+        Cart
+      </Heading>
 
-        <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
-          <Stack as="ul" flex="2" spacing="4">
-            {cart && cart.length > 0 ? (
-              cart?.map(item => (
-                <Flex
-                  key={item.id}
-                  as="li"
-                  h="56"
-                  shadow="md"
-                  borderRightRadius="md"
-                >
-                  <Box pos="relative" flex="1">
-                    <Img
-                      as={Image}
-                      layout="fill"
-                      src={item.image}
-                      alt={item.name}
-                      borderLeftRadius="md"
-                    />
-                  </Box>
-                  <Flex p="4" h="full" direction="column" gap="2" flex="2">
-                    <NextLink href={`/items/${item.slug}`}>
-                      <Link size="md" fontWeight="bold" fontSize="xl">
-                        {item.name}
-                      </Link>
-                    </NextLink>
+      <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
+        <Stack as="ul" flex="2" spacing="4">
+          {cart && cart.length > 0 ? (
+            cart?.map(item => (
+              <Flex
+                key={item.id}
+                as="li"
+                h="56"
+                shadow="md"
+                borderRightRadius="md"
+              >
+                <Box pos="relative" flex="1">
+                  <Img
+                    as={Image}
+                    layout="fill"
+                    src={item.image}
+                    alt={item.name}
+                    borderLeftRadius="md"
+                  />
+                </Box>
+                <Flex p="4" h="full" direction="column" gap="2" flex="2">
+                  <NextLink href={`/items/${item.slug}`}>
+                    <Link size="md" fontWeight="bold" fontSize="xl">
+                      {item.name}
+                    </Link>
+                  </NextLink>
 
-                    <Text noOfLines={3} title={item.description}>
-                      {item.description}
-                    </Text>
-                    <Quantity
-                      value={item.quantity}
-                      onChange={quantity =>
-                        onUpdateItemQuantity(item.id, quantity)
-                      }
-                      maxQuantity={item.stock}
-                    />
+                  <Text noOfLines={3} title={item.description}>
+                    {item.description}
+                  </Text>
+                  <Quantity
+                    value={item.quantity}
+                    onChange={quantity =>
+                      onUpdateItemQuantity(item.id, quantity)
+                    }
+                    maxQuantity={item.stock}
+                  />
 
-                    <Flex justify="space-between" mt="auto">
-                      <Text fontWeight="bold">{toUSCurrency(item.price)}</Text>
-                      <Button
-                        variant="link"
-                        onClick={() => onRemoveCartItem(item.id)}
-                      >
-                        Remove
-                      </Button>
-                    </Flex>
+                  <Flex justify="space-between" mt="auto">
+                    <Text fontWeight="bold">{toUSCurrency(item.price)}</Text>
+                    <Button
+                      variant="link"
+                      onClick={() => onRemoveCartItem(item.id)}
+                    >
+                      Remove
+                    </Button>
                   </Flex>
                 </Flex>
-              ))
-            ) : (
-              <Text>Your cart is empty</Text>
-            )}
-          </Stack>
+              </Flex>
+            ))
+          ) : (
+            <Text>Your cart is empty</Text>
+          )}
+        </Stack>
 
-          <Box h="sm" flex="1" pos="sticky" top="20">
-            <OrderSummary cartItems={cart}>
-              <NextLink href="/checkout" passHref>
-                <Button mt="auto" as="a" w="full">
-                  Checkout
-                </Button>
-              </NextLink>
-            </OrderSummary>
-          </Box>
-        </Flex>
-      </Box>
-    </>
+        <Box h="sm" flex="1" pos="sticky" top="20">
+          <OrderSummary cartItems={cart}>
+            <NextLink href="/checkout" passHref>
+              <Button mt="auto" as="a" w="full">
+                Checkout
+              </Button>
+            </NextLink>
+          </OrderSummary>
+        </Box>
+      </Flex>
+    </Box>
   )
 }
 

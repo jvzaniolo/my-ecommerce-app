@@ -13,7 +13,7 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const { data: items } = useSWR<Item[]>('/items', fetcher, fallback)
 
   return (
-    <Box>
+    <Box w="full">
       <Flex gap="4" flexWrap="wrap">
         {items && items.length > 0 ? (
           items?.map(item => (
