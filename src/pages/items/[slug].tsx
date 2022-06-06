@@ -24,7 +24,7 @@ import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import api, { fetcher } from '~/services/axios'
 
-const ItemPage: NextPage = () => {
+const Item: NextPage = () => {
   const router = useRouter()
   const { slug } = router.query
   const { cache } = useSWRConfig()
@@ -93,4 +93,4 @@ const ItemPage: NextPage = () => {
   )
 }
 
-export default ItemPage
+export default Item

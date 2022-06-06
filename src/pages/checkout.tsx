@@ -4,7 +4,7 @@ import { useSWRConfig } from 'swr'
 import { Box, Flex, Heading } from '@chakra-ui/react'
 import OrderSummary from '~/components/order-summary'
 
-const CheckoutPage: NextPage = () => {
+const Checkout: NextPage = () => {
   const { cache } = useSWRConfig()
 
   const cart = cache.get('/cart')
@@ -24,4 +24,4 @@ const CheckoutPage: NextPage = () => {
   )
 }
 
-export default CheckoutPage
+export default Checkout
