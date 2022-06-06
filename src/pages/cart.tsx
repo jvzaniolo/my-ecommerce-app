@@ -132,7 +132,15 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
             )}
           </Stack>
 
-          <OrderSummary />
+          <Box h="sm" flex="1" pos="sticky" top="20">
+            <OrderSummary cartItems={cart}>
+              <NextLink href="/checkout" passHref>
+                <Button mt="auto" as="a" w="full">
+                  Checkout
+                </Button>
+              </NextLink>
+            </OrderSummary>
+          </Box>
         </Flex>
       </Box>
     </>
