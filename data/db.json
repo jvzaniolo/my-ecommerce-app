@@ -28,16 +28,6 @@
       "stock": 30
     }
   ],
-  "cart": [
-    {
-      "id": "1",
-      "slug": "calca-de-moletom-imperial-preta-columbus",
-      "name": "Calça De Moletom Imperial Preta Columbus",
-      "description": "A calça de moletom da Imperial Esports é do jeito que nossos jogadores gostam: com alto padrão de conforto para o dia-a-dia, perfeita para jogar aquela partida que pede concentração total e não pode ser influenciada por qualquer tipo de desconforto.",
-      "price": 211,
-      "image": "https://static.cdnlive.com.br/uploads/602/produto/16540946765310_detalhe.jpg",
-      "stock": 100,
-      "quantity": 4
-    }
-  ]
+  "cart": [],
+  "orders": []
 }
