@@ -2,63 +2,63 @@ import type { ReactNode } from 'react'
 
 import Link from 'next/link'
 import { MdOutlineShoppingCart } from 'react-icons/md'
-import { Box, Flex, Heading, Icon, IconButton, Text } from '@chakra-ui/react'
+import {
+  Box,
+  Container,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Icon,
+  IconButton,
+  Spacer,
+  Text,
+} from '@chakra-ui/react'
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <Flex direction="column" h="100vh">
-      <Box
+    <Grid h="100vh" templateRows={'auto 1fr auto'}>
+      <GridItem
         as="header"
+        bg="white"
         top="0"
         pos="sticky"
-        flex="0"
         shadow="base"
         zIndex="sticky"
-        bgColor="white"
       >
-        <Flex
-          p="3"
-          mx="auto"
-          maxW="container.xl"
-          align="center"
-          justify="space-between"
-        >
-          <Link href="/" passHref>
-            <Heading as="a" size="sm">
-              My E-Commerce App
-            </Heading>
-          </Link>
+        <Container maxW="container.xl">
+          <Flex p="2" align="center">
+            <Link href="/" passHref>
+              <Heading as="a" size="sm">
+                My E-Commerce App
+              </Heading>
+            </Link>
+            <Spacer />
+            <Link href="/cart" passHref>
+              <IconButton
+                as="a"
+                aria-label="cart"
+                icon={<MdOutlineShoppingCart />}
+              />
+            </Link>
+          </Flex>
+        </Container>
+      </GridItem>
 
-          <Link href="/cart" passHref>
-            <IconButton
-              as="a"
-              aria-label="cart"
-              icon={<Icon as={MdOutlineShoppingCart} />}
-            />
-          </Link>
-        </Flex>
-      </Box>
+      <GridItem as="main">
+        <Container maxW="container.xl" flexGrow="1">
+          <Flex p="2">{children}</Flex>
+        </Container>
+      </GridItem>
 
-      <Flex as="main" p="4" maxW="container.xl" mx="auto" w="full" flex="1">
-        {children}
-      </Flex>
-
-      <Box
-        as="footer"
-        p="8"
-        w="full"
-        mx="auto"
-        flex="0"
-        textAlign="center"
-        maxW="container.xl"
-        borderTop="1px solid"
-        borderColor="blackAlpha.200"
-      >
-        <Text color="blackAlpha.800" size="sm">
-          Made with 💜 by @jvzaniolo | Copyright © 2022
-        </Text>
-      </Box>
-    </Flex>
+      <GridItem as="footer" borderTop="1px solid" borderColor="blackAlpha.200">
+        <Container p="8" maxW="container.xl" centerContent>
+          <Text color="blackAlpha.800" size="sm">
+            Made with 💜 by @jvzaniolo | Copyright © 2022
+          </Text>
+        </Container>
+      </GridItem>
+    </Grid>
   )
 }
 
