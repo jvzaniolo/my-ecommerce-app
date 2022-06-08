@@ -108,10 +108,8 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
                   </Text>
                   <Quantity
                     value={item.quantity}
-                    onChange={quantity =>
-                      onUpdateItemQuantity(item.id, quantity)
-                    }
-                    maxQuantity={item.stock}
+                    onChange={value => onUpdateItemQuantity(item.id, value)}
+                    max={item.stock}
                   />
 
                   <Flex justify="space-between" mt="auto">
