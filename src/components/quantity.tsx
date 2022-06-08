@@ -1,58 +1,49 @@
 import { MdAdd, MdRemove } from 'react-icons/md'
 import {
+  HStack,
   Icon,
   IconButton,
   Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
+  useNumberInput,
 } from '@chakra-ui/react'
 
-interface QuantityProps {
+type QuantityProps = {
+  max: number
   value: number
-  onChange: (value: number) => any
-  maxQuantity: number
+  onChange: (value: number) => void
 }
 
-const Quantity = ({ value, onChange, maxQuantity }: QuantityProps) => {
-  function onIncrease() {
-    if (value < maxQuantity) {
-      onChange(value + 1)
-    } else {
-      onChange(value)
-    }
-  }
+const Quantity = ({ max, value, onChange }: QuantityProps) => {
+  const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
+    useNumberInput({
+      min: 1,
+      max,
+      value,
+      onChange: (_, number) => {
+        onChange(number)
+      },
+    })
 
-  function onDecrease() {
-    if (value > 1) {
-      onChange(value - 1)
-    } else {
-      onChange(value)
-    }
-  }
+  const inc = getIncrementButtonProps()
+  const dec = getDecrementButtonProps()
+  const input = getInputProps()
 
   return (
-    <InputGroup>
-      <InputLeftElement>
-        <IconButton
-          size="sm"
-          icon={<Icon as={MdRemove} />}
-          aria-label="Decrease"
-          onClick={onDecrease}
-          data-testid="decrease-quantity"
-        />
-      </InputLeftElement>
-      <Input type="number" name="quantity" value={value} onChange={() => {}} />
-      <InputRightElement>
-        <IconButton
-          size="sm"
-          icon={<Icon as={MdAdd} />}
-          aria-label="Increase"
-          onClick={onIncrease}
-          data-testid="increase-quantity"
-        />
-      </InputRightElement>
-    </InputGroup>
+    <HStack>
+      <IconButton
+        icon={<Icon as={MdRemove} />}
+        aria-label="Decrease"
+        data-testid="decrease-quantity"
+        {...dec}
+      />
+      <Input type="number" name="quantity" {...input} />
+      <IconButton
+        icon={<Icon as={MdAdd} />}
+        aria-label="Increase"
+        data-testid="increase-quantity"
+        {...inc}
+      />
+    </HStack>
   )
 }
 
