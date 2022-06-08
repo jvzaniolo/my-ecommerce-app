@@ -4,19 +4,28 @@ import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 import type { FormData } from '~/types/checkout-form'
 
-import useSWR from 'swr'
 import { useRouter } from 'next/router'
+import useSWR from 'swr'
 import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Checkbox, Flex, Heading, Stack } from '@chakra-ui/react'
 import api, { fetcher } from '~/services/axios'
 import Input from '~/components/input'
 import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
+import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
   const { data: cart, mutate } = useSWR<Item[]>('/cart', fetcher, { fallback })
-  const { handleSubmit, register } = useForm<FormData>()
+  const {
+    control,
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(checkoutFormSchema, { abortEarly: false }),
+  })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
     const { data: order } = await api.post('/orders', {
@@ -44,7 +53,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
       >
         <Flex flex="2" gap="6" direction="column">
           <Flex as="section" direction="column">
-            <ShippingForm register={register} />
+            <ShippingForm register={register} control={control} />
           </Flex>
 
           <Flex as="section" direction="column">
@@ -68,10 +77,22 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
             </Heading>
 
             <Flex mt="3" direction="column">
-              <Input label="Card Number" {...register('payment.cardNumber')} />
+              <Input
+                label="Card Number"
+                {...register('payment.cardNumber')}
+                error={errors.payment?.cardNumber?.message}
+              />
               <Stack direction="row">
-                <Input label="Expiry" {...register('payment.expiry')} />
-                <Input label="CVV" {...register('payment.cvv')} />
+                <Input
+                  label="Expiry"
+                  {...register('payment.expiry')}
+                  error={errors.payment?.expiry?.message}
+                />
+                <Input
+                  label="CVV"
+                  {...register('payment.cvv')}
+                  error={errors.payment?.cvv?.message}
+                />
               </Stack>
             </Flex>
           </Flex>
