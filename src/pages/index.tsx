@@ -2,53 +2,65 @@ import type { GetServerSideProps, NextPage } from 'next'
 import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 
-import Link from 'next/link'
-import Image from 'next/image'
+import NextLink from 'next/link'
+import NextImage from 'next/image'
 import useSWR from 'swr'
-import { Box, Flex, Heading, Img, Text } from '@chakra-ui/react'
+import {
+  AspectRatio,
+  Box,
+  Center,
+  Heading,
+  Img,
+  LinkBox,
+  LinkOverlay,
+  SimpleGrid,
+  Text,
+} from '@chakra-ui/react'
 import api, { fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const { data: items } = useSWR<Item[]>('/items', fetcher, fallback)
 
-  return (
-    <Box w="full">
-      <Flex gap="4" flexWrap="wrap">
-        {items && items.length > 0 ? (
-          items?.map(item => (
-            <Link key={item.id} href={`/items/${item.slug}`} passHref>
-              <Flex as="a" direction="column" shadow="md" maxW="72">
-                <Box h="64" pos="relative">
-                  <Img
-                    as={Image}
-                    src={item.image}
-                    alt={item.name}
-                    layout="fill"
-                    borderTopRadius="md"
-                  />
-                </Box>
-                <Flex
-                  p="3"
-                  gap="3"
-                  flex="1"
-                  direction="column"
-                  borderBottomRadius="md"
-                >
-                  <Heading size="sm">{item.name}</Heading>
-                  <Text noOfLines={3}>{item.description}</Text>
-                  <Text mt="auto" fontWeight="bold">
-                    {toUSCurrency(item.price)}
-                  </Text>
-                </Flex>
-              </Flex>
-            </Link>
-          ))
-        ) : (
-          <Text>There are no items yet.</Text>
-        )}
-      </Flex>
-    </Box>
+  return items && items.length > 0 ? (
+    <SimpleGrid
+      gap="4"
+      templateColumns={{
+        base: 'repeat(auto-fit, minmax(250px, 1fr))',
+        lg: 'repeat(auto-fit, minmax(300px, 0fr))',
+      }}
+    >
+      {items?.map(item => (
+        <LinkBox key={item.id} shadow="md" overflow="hidden" borderRadius="lg">
+          <AspectRatio ratio={4 / 3}>
+            <Img
+              as={NextImage}
+              src={item.image}
+              alt={item.name}
+              layout="fill"
+              objectFit="cover"
+            />
+          </AspectRatio>
+          <Box p={3}>
+            <Heading as="h2" size="sm" fontWeight="medium">
+              <NextLink href={`/items/${item.slug}`} passHref>
+                <LinkOverlay>{item.name}</LinkOverlay>
+              </NextLink>
+            </Heading>
+            <Text fontSize="xl" fontWeight="bold">
+              {toUSCurrency(item.price)}
+            </Text>
+            <Text mt="3" noOfLines={3}>
+              {item.description}
+            </Text>
+          </Box>
+        </LinkBox>
+      ))}
+    </SimpleGrid>
+  ) : (
+    <Center>
+      <Text>There are no items yet.</Text>
+    </Center>
   )
 }
 
