@@ -3,13 +3,11 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { MdOutlineShoppingCart } from 'react-icons/md'
 import {
-  Box,
   Container,
   Flex,
   Grid,
   GridItem,
   Heading,
-  Icon,
   IconButton,
   Spacer,
   Text,
@@ -46,13 +44,13 @@ const Layout = ({ children }: { children: ReactNode }) => {
       </GridItem>
 
       <GridItem as="main">
-        <Container maxW="container.xl" flexGrow="1">
-          <Flex p="2">{children}</Flex>
+        <Container h="full" maxW="container.xl" p="4">
+          {children}
         </Container>
       </GridItem>
 
       <GridItem as="footer" borderTop="1px solid" borderColor="blackAlpha.200">
-        <Container p="8" maxW="container.xl" centerContent>
+        <Container py="10" maxW="container.xl" centerContent>
           <Text color="blackAlpha.800" size="sm">
             Made with 💜 by @jvzaniolo | Copyright © 2022
           </Text>
