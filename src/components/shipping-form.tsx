@@ -1,4 +1,8 @@
-import type { UseFormRegister } from 'react-hook-form'
+import {
+  type Control,
+  type UseFormRegister,
+  useFormState,
+} from 'react-hook-form'
 import type { FormData } from '~/types/checkout-form'
 
 import { Heading, Stack } from '@chakra-ui/react'
@@ -6,9 +10,13 @@ import Input from './input'
 
 const ShippingForm = ({
   register,
+  control,
 }: {
+  control: Control<FormData>
   register: UseFormRegister<FormData>
 }) => {
+  const { errors } = useFormState({ control })
+
   return (
     <>
       <Heading as="h2" size="lg">
@@ -16,43 +24,73 @@ const ShippingForm = ({
       </Heading>
 
       <Stack mt="3">
-        <Input label="E-mail" type="email" {...register('shipping.email')} />
+        <Input
+          label="E-mail"
+          type="email"
+          {...register('shipping.email')}
+          error={errors.shipping?.email?.message}
+        />
         <Stack direction="row">
           <Input
             label="First name"
             type="text"
             {...register('shipping.firstName')}
+            error={errors.shipping?.firstName?.message}
           />
           <Input
             label="Last name"
             type="text"
             {...register('shipping.lastName')}
+            error={errors.shipping?.lastName?.message}
           />
         </Stack>
-        <Input label="Address" type="text" {...register('shipping.address')} />
+        <Input
+          label="Address"
+          type="text"
+          {...register('shipping.address')}
+          error={errors.shipping?.address?.message}
+        />
         <Input
           label="Secondary Address"
           type="text"
           {...register('shipping.secondaryAddress')}
+          error={errors.shipping?.secondaryAddress?.message}
         />
 
         <Stack direction="row">
-          <Input label="City" type="text" {...register('shipping.city')} />
-          <Input label="State" type="text" {...register('shipping.state')} />
+          <Input
+            label="City"
+            type="text"
+            {...register('shipping.city')}
+            error={errors.shipping?.city?.message}
+          />
+          <Input
+            label="State"
+            type="text"
+            {...register('shipping.state')}
+            error={errors.shipping?.state?.message}
+          />
         </Stack>
         <Stack direction="row">
           <Input
             label="Country"
             type="text"
             {...register('shipping.country')}
+            error={errors.shipping?.country?.message}
           />
           <Input
             label="Zip Code"
             type="text"
             {...register('shipping.zipCode')}
+            error={errors.shipping?.zipCode?.message}
           />
         </Stack>
-        <Input label="Phone" type="text" {...register('shipping.phone')} />
+        <Input
+          label="Phone"
+          type="tel"
+          {...register('shipping.phone')}
+          error={errors.shipping?.phone?.message}
+        />
       </Stack>
     </>
   )
