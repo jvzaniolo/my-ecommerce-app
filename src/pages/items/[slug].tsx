@@ -21,12 +21,14 @@ import {
   Img,
   Stack,
   Text,
+  useToast,
 } from '@chakra-ui/react'
 import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import api, { fetcher } from '~/services/axios'
 
 const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+  const toast = useToast()
   const router = useRouter()
   const { slug } = router.query
   const { data } = useSWR<[ItemType]>(
@@ -42,10 +44,27 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   if (!item) return <>Loading...</>
 
   async function onAddToCart() {
-    await mutate('/cart', () => {
-      api.post('/cart', { ...item, quantity })
-    })
-    router.push('/cart')
+    try {
+      await mutate('/cart', () => {
+        api.post('/cart', { ...item, quantity })
+      })
+      toast({
+        title: 'Added to cart',
+        description: `${item?.name} has been added to your cart`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+      router.push('/cart')
+    } catch (error) {
+      toast({
+        title: 'Something went wrong',
+        description: `${item?.name} was not added to your cart`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
   }
 
   return (
