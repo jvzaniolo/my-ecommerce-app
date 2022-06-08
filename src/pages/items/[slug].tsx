@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import useSWR, { mutate } from 'swr'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
+  AspectRatio,
   Box,
   Breadcrumb,
   BreadcrumbItem,
@@ -17,8 +18,8 @@ import {
   Divider,
   Flex,
   Heading,
-  Icon,
   Img,
+  Stack,
   Text,
 } from '@chakra-ui/react'
 import Quantity from '~/components/quantity'
@@ -48,8 +49,8 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   }
 
   return (
-    <Box w="full">
-      <Breadcrumb mt="3" mb="6">
+    <Flex h="full" direction="column">
+      <Breadcrumb mb="4">
         <BreadcrumbItem>
           <Link href="/" passHref>
             <BreadcrumbLink>Home</BreadcrumbLink>
@@ -60,39 +61,47 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         </BreadcrumbItem>
       </Breadcrumb>
 
-      <Flex gap="14" wrap="wrap">
-        <Box flex="1" pos="relative" h="xl" minW="xs">
-          <Img as={Image} layout="fill" src={item.image} alt={item.name} />
+      <Flex h="full" gap="14" wrap="wrap">
+        <Box flex="3">
+          <AspectRatio minW="300" h="100%" ratio={16 / 9}>
+            <Img
+              as={Image}
+              layout="fill"
+              src={item.image}
+              alt={item.name}
+              objectFit="cover"
+            />
+          </AspectRatio>
         </Box>
-        <Flex flex="1" gap="3" direction="column">
+        <Flex flex="2" direction="column" gap="3">
           <Flex justify="space-between">
-            <Heading>{item.name}</Heading>
-            <Heading>{toUSCurrency(item.price)}</Heading>
+            <Heading as="h2">{item.name}</Heading>
+            <Heading as="h3">{toUSCurrency(item.price)}</Heading>
           </Flex>
           <Text>In-Stock: {item.stock}</Text>
           <Divider />
           <Text>{item.description}</Text>
 
-          <Box mt="8">
+          <Stack mt="8">
             <Quantity
               value={quantity}
               onChange={value => setQuantity(value)}
-              maxQuantity={item.stock}
+              max={item.stock}
             />
 
             <Button
               w="full"
-              mt="3"
+              colorScheme="purple"
               onClick={onAddToCart}
               isLoading={isValidating}
+              leftIcon={<MdOutlineAddShoppingCart />}
             >
-              <Icon mr="2" as={MdOutlineAddShoppingCart} />
               Add to cart
             </Button>
-          </Box>
+          </Stack>
         </Flex>
       </Flex>
-    </Box>
+    </Flex>
   )
 }
 
