@@ -24,6 +24,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     register,
     formState: { errors },
   } = useForm<FormData>({
+    mode: 'onBlur',
     resolver: yupResolver(checkoutFormSchema, { abortEarly: false }),
   })
 
