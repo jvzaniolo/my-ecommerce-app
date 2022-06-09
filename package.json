@@ -11,12 +11,12 @@
     "server": "node data/server.js"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.1.2",
+    "@chakra-ui/react": "^2.2.1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@hookform/resolvers": "^2.9.0",
     "axios": "^0.27.2",
-    "framer-motion": "^6",
+    "framer-motion": "^6.3.11",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
@@ -29,16 +29,16 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@types/json-server": "^0.14.4",
-    "@types/node": "17.0.36",
-    "@types/react": "18.0.9",
+    "@types/node": "17.0.41",
+    "@types/react": "18.0.12",
     "@types/react-dom": "18.0.5",
-    "eslint": "8.16.0",
+    "eslint": "8.17.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-testing-library": "^5.5.1",
-    "jest": "^28.1.0",
-    "jest-environment-jsdom": "^28.1.0",
+    "jest": "^28.1.1",
+    "jest-environment-jsdom": "^28.1.1",
     "json-server": "^0.17.0",
-    "typescript": "4.7.2"
+    "typescript": "4.7.3"
   }
 }
