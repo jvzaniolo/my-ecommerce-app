@@ -77,7 +77,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
               Payment
             </Heading>
 
-            <Flex mt="3" direction="column">
+            <Stack mt="3" direction="column">
               <Input
                 label="Card Number"
                 {...register('payment.cardNumber')}
@@ -95,7 +95,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
                   error={errors.payment?.cvv?.message}
                 />
               </Stack>
-            </Flex>
+            </Stack>
           </Flex>
         </Flex>
 
