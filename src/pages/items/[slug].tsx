@@ -21,11 +21,13 @@ import {
   Img,
   Stack,
   Text,
+  useDisclosure,
   useToast,
 } from '@chakra-ui/react'
 import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import api, { fetcher } from '~/services/axios'
+import CartDrawer from '~/components/cart-drawer'
 
 const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const toast = useToast()
@@ -36,8 +38,9 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     () => fetcher(`/items?slug=${slug}`),
     { fallback }
   )
-  const { isValidating } = useSWR('/cart', fetcher)
   const [quantity, setQuantity] = useState(1)
+  const { isValidating } = useSWR<ItemType[]>('/cart', fetcher)
+  const { isOpen, onOpen, onClose } = useDisclosure({ id: 'cart' })
 
   const item = data?.[0]
 
@@ -48,6 +51,7 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
       await mutate('/cart', () => {
         api.post('/cart', { ...item, quantity })
       })
+
       toast({
         title: 'Added to cart',
         description: `${item?.name} has been added to your cart`,
@@ -55,7 +59,8 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         duration: 5000,
         isClosable: true,
       })
-      router.push('/cart')
+
+      onOpen()
     } catch (error) {
       toast({
         title: 'Something went wrong',
@@ -120,6 +125,8 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
           </Stack>
         </Flex>
       </Flex>
+
+      <CartDrawer isOpen={isOpen} onClose={onClose} />
     </Flex>
   )
 }
