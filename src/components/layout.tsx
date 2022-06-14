@@ -3,18 +3,23 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { MdOutlineShoppingCart } from 'react-icons/md'
 import {
+  Button,
   Container,
   Flex,
   Grid,
   GridItem,
   Heading,
+  HStack,
   IconButton,
   Spacer,
   Text,
 } from '@chakra-ui/react'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { useUser } from '~/contexts/user'
+import { supabase } from '~/services/supabase'
 
 const Layout = ({ children }: { children: ReactNode }) => {
+  const { session } = useUser()
   const { onOpenCartDrawer } = useCartDrawer()
 
   return (
@@ -34,12 +39,28 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 My E-Commerce App
               </Heading>
             </Link>
+
             <Spacer />
-            <IconButton
-              onClick={onOpenCartDrawer}
-              aria-label="cart"
-              icon={<MdOutlineShoppingCart />}
-            />
+
+            <HStack>
+              <IconButton
+                onClick={onOpenCartDrawer}
+                aria-label="cart"
+                icon={<MdOutlineShoppingCart />}
+              />
+
+              {session ? (
+                <Button colorScheme="purple" onClick={supabase.auth.signOut}>
+                  Sign Out
+                </Button>
+              ) : (
+                <Link href="/sign-in" passHref>
+                  <Button as="a" colorScheme="purple">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+            </HStack>
           </Flex>
         </Container>
       </GridItem>
