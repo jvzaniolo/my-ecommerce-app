@@ -1,8 +1,6 @@
 import {
   AspectRatio,
-  Box,
   Button,
-  Divider,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -19,17 +17,19 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
+import { useCartDrawer } from '~/contexts/cart-drawer'
 import api, { fetcher } from '~/services/axios'
 import { Item } from '~/types/item'
 import { toUSCurrency } from '~/utils/format'
 import Quantity from './quantity'
 
-type CartDrawer = {
+type CartDrawerProps = {
   isOpen: boolean
   onClose: () => void
 }
 
-const CartDrawer = ({ isOpen, onClose }: CartDrawer) => {
+const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
+  const { onCloseCartDrawer } = useCartDrawer()
   const { data: items } = useSWR<Item[]>('/cart', fetcher)
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
@@ -48,6 +48,27 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawer) => {
       },
       {
         optimisticData: cartWithUpdatedQuantity,
+        rollbackOnError: true,
+        revalidate: false,
+        populateCache: true,
+      }
+    )
+  }
+
+  async function onRemoveCartItem(id: string) {
+    if (!items) return
+
+    const filteredCart = items.filter(item => item.id !== id)
+
+    mutate(
+      '/cart',
+      async () => {
+        await api.delete(`/cart/${id}`)
+
+        return filteredCart
+      },
+      {
+        optimisticData: filteredCart,
         rollbackOnError: true,
         revalidate: false,
         populateCache: true,
@@ -85,9 +106,17 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawer) => {
                   <Heading as="h3" size="md" fontWeight="medium">
                     {item.name}
                   </Heading>
-                  <Text fontSize="lg" fontWeight="semibold">
-                    {toUSCurrency(item.price * item.quantity)}
-                  </Text>
+                  <Flex justify="space-between">
+                    <Text fontSize="lg" fontWeight="semibold">
+                      {toUSCurrency(item.price * item.quantity)}
+                    </Text>
+                    <Button
+                      variant="link"
+                      onClick={() => onRemoveCartItem(item.id)}
+                    >
+                      Remove
+                    </Button>
+                  </Flex>
                   <Quantity
                     value={item.quantity}
                     onChange={value => onUpdateItemQuantity(item.id, value)}
@@ -101,7 +130,14 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawer) => {
 
         <DrawerFooter>
           <Link href="/checkout" passHref>
-            <Button as="a" flex="1" colorScheme="purple">
+            <Button
+              as="a"
+              flex="1"
+              colorScheme="purple"
+              onClick={() => {
+                onCloseCartDrawer()
+              }}
+            >
               Checkout
             </Button>
           </Link>
