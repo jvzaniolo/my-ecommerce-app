@@ -32,16 +32,11 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const toast = useToast()
   const router = useRouter()
   const { slug } = router.query
-  const { data } = useSWR<[ItemType]>(
-    `/items/${slug}`,
-    () => fetcher(`/items?slug=${slug}`),
-    { fallback }
-  )
+  const { data: item } = useSWR<ItemType>(`/api/products/${slug}`, fetcher, {
+    fallback,
+  })
   const [quantity, setQuantity] = useState(1)
-  const { isValidating } = useSWR<ItemType[]>('/cart', fetcher)
   const { onOpenCartDrawer } = useCartDrawer()
-
-  const item = data?.[0]
 
   if (!item) return <>Loading...</>
 
@@ -116,7 +111,6 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
               w="full"
               colorScheme="purple"
               onClick={onAddToCart}
-              isLoading={isValidating}
               leftIcon={<MdOutlineAddShoppingCart />}
             >
               Add to cart
@@ -130,12 +124,12 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { slug } = context.query
-  const { data } = await api.get(`/items?slug=${slug}`)
+  const { data } = await api.get(`/api/products/${slug}`)
 
   return {
     props: {
       fallback: {
-        [`/items/${slug}`]: data,
+        [`/api/products/${slug}`]: data,
       },
     },
   }
