@@ -7,9 +7,6 @@ import NextLink from 'next/link'
 import useSWR, { mutate } from 'swr'
 import {
   Box,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
   Button,
   Flex,
   Heading,
@@ -18,7 +15,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import api, { fetcher } from '~/services/axios'
+import { fetcher } from '~/services/fetcher'
 import { toUSCurrency } from '~/utils/format'
 import Quantity from '~/components/quantity'
 import OrderSummary from '~/components/order-summary'
@@ -29,7 +26,11 @@ import OrderSummary from '~/components/order-summary'
  * @see src/components/cart-drawer.tsx
  */
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: cart } = useSWR<Item[]>('/cart', fetcher, { fallback })
+  const { data: cart } = useSWR<Item[]>(
+    '/cart',
+    () => fetcher('http://localhost:3333/cart'),
+    { fallback }
+  )
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
     if (!cart) return
@@ -41,7 +42,13 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     mutate(
       '/cart',
       async () => {
-        await api.patch(`/cart/${id}`, { quantity })
+        await fetcher(`http://localhost/cart/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ quantity }),
+        })
 
         return cartWithUpdatedQuantity
       },
@@ -62,7 +69,9 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     mutate(
       '/cart',
       async () => {
-        await api.delete(`/cart/${id}`)
+        await fetcher(`http://localhost:3333/cart/${id}`, {
+          method: 'DELETE',
+        })
 
         return filteredCart
       },
@@ -149,7 +158,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await api.get('/cart')
+  const data = await fetcher('http://localhost:3333/cart')
 
   return {
     props: {

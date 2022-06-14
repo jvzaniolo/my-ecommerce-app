@@ -13,13 +13,13 @@ const handler: NextApiHandler = async (req, res) => {
         .single()
 
       if (error) {
-        res.status(status).json({ message: error.message })
+        return res.status(status).json({ message: error.message })
       }
 
-      res.status(status).json(data)
+      return res.status(status).json(data)
     }
     default: {
-      res.status(405).json({
+      return res.status(405).json({
         message: 'Method Not Allowed',
       })
     }

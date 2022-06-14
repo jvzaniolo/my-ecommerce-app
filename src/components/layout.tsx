@@ -50,7 +50,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
               />
 
               {session ? (
-                <Button colorScheme="purple" onClick={supabase.auth.signOut}>
+                <Button
+                  colorScheme="purple"
+                  onClick={() => supabase.auth.signOut()}
+                >
                   Sign Out
                 </Button>
               ) : (

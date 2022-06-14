@@ -25,16 +25,20 @@ import {
 } from '@chakra-ui/react'
 import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
-import api, { fetcher } from '~/services/axios'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { fetcher } from '~/services/fetcher'
 
 const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const toast = useToast()
   const router = useRouter()
   const { slug } = router.query
-  const { data: item } = useSWR<ItemType>(`/api/products/${slug}`, fetcher, {
-    fallback,
-  })
+  const { data: item } = useSWR<ItemType>(
+    `/api/products/${slug}`,
+    () => fetcher(`http://localhost:3000/api/products/${slug}`),
+    {
+      fallback,
+    }
+  )
   const [quantity, setQuantity] = useState(1)
   const { onOpenCartDrawer } = useCartDrawer()
 
@@ -43,7 +47,13 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   async function onAddToCart() {
     try {
       await mutate('/cart', () => {
-        api.post('/cart', { ...item, quantity })
+        fetcher('http://localhost:3333/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...item, quantity }),
+        })
       })
 
       toast({
@@ -124,7 +134,9 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { slug } = context.query
-  const { data } = await api.get(`/api/products/${slug}`)
+  const data = await fetcher<ItemType>(
+    `http://localhost:3000/api/products/${slug}`
+  )
 
   return {
     props: {

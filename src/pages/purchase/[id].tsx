@@ -21,13 +21,17 @@ import {
   Link,
   Icon,
 } from '@chakra-ui/react'
-import api, { fetcher } from '~/services/axios'
+import { fetcher } from '~/services/fetcher'
 import { toUSCurrency } from '~/utils/format'
 
 const Purchase: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
   const { id } = router.query
-  const { data } = useSWR<[Order]>(`/orders?id=${id}`, fetcher, { fallback })
+  const { data } = useSWR<[Order]>(
+    `/orders?id=${id}`,
+    () => fetcher(`http://localhost:3333/orders?id=${id}`),
+    { fallback }
+  )
 
   const order = data?.[0]
 
@@ -99,9 +103,7 @@ const Purchase: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query
-  const { data: order } = await api.get(`/orders`, {
-    params: { id },
-  })
+  const order = await fetcher(`http://localhost:3333/orders?id=${id}`)
 
   return {
     props: {

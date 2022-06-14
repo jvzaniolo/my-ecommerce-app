@@ -16,11 +16,15 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react'
-import api, { fetcher } from '~/services/axios'
+import { fetcher } from '~/services/fetcher'
 import { toUSCurrency } from '~/utils/format'
 
 const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: items } = useSWR<Item[]>('/api/products', fetcher, { fallback })
+  const { data: items } = useSWR<Item[]>(
+    '/api/products',
+    () => fetcher('http://localhost:3000/api/products'),
+    { fallback }
+  )
 
   return items && items.length > 0 ? (
     <SimpleGrid
@@ -65,7 +69,7 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await api.get('/api/products')
+  const data = await fetcher<Item[]>('http://localhost:3000/api/products')
 
   return {
     props: {

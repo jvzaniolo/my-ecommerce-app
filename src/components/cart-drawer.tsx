@@ -18,7 +18,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import api, { fetcher } from '~/services/axios'
+import axios, { fetcher } from '~/services/axios'
 import { Item } from '~/types/item'
 import { toUSCurrency } from '~/utils/format'
 import Quantity from './quantity'
@@ -42,7 +42,7 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
     mutate(
       '/cart',
       async () => {
-        await api.patch(`/cart/${id}`, { quantity })
+        await axios.patch(`/cart/${id}`, { quantity })
 
         return cartWithUpdatedQuantity
       },
@@ -63,7 +63,7 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
     mutate(
       '/cart',
       async () => {
-        await api.delete(`/cart/${id}`)
+        await axios.delete(`/cart/${id}`)
 
         return filteredCart
       },

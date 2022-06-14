@@ -9,7 +9,7 @@ import useSWR from 'swr'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Checkbox, Flex, Heading, Stack } from '@chakra-ui/react'
-import api, { fetcher } from '~/services/axios'
+import { fetcher } from '~/services/fetcher'
 import Input from '~/components/input'
 import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
@@ -17,7 +17,11 @@ import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
-  const { data: cart, mutate } = useSWR<Item[]>('/cart', fetcher, { fallback })
+  const { data: cart, mutate } = useSWR<Item[]>(
+    '/cart',
+    () => fetcher('http://localhost:3333/cart'),
+    { fallback }
+  )
   const {
     control,
     handleSubmit,
@@ -29,9 +33,12 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
-    const { data: order } = await api.post('/orders', {
-      ...data,
-      items: cart,
+    const { data: order } = await fetcher('/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...data, items: cart }),
     })
 
     mutate([])
@@ -110,7 +117,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await api.get('/cart')
+  const data = await fetcher('http://localhost:3333/cart')
 
   return {
     props: {
