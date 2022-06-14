@@ -23,6 +23,11 @@ import { toUSCurrency } from '~/utils/format'
 import Quantity from '~/components/quantity'
 import OrderSummary from '~/components/order-summary'
 
+/**
+ * @deprecated
+ * @see Using CartDrawer for now
+ * @see src/components/cart-drawer.tsx
+ */
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const { data: cart } = useSWR<Item[]>('/cart', fetcher, { fallback })
 

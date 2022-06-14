@@ -11,12 +11,11 @@ import {
   IconButton,
   Spacer,
   Text,
-  useDisclosure,
 } from '@chakra-ui/react'
-import CartDrawer from './cart-drawer'
+import { useCartDrawer } from '~/contexts/cart-drawer'
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure({ id: 'cart' })
+  const { onOpenCartDrawer } = useCartDrawer()
 
   return (
     <Grid h="100vh" templateRows={'auto 1fr auto'}>
@@ -37,7 +36,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             </Link>
             <Spacer />
             <IconButton
-              onClick={onOpen}
+              onClick={onOpenCartDrawer}
               aria-label="cart"
               icon={<MdOutlineShoppingCart />}
             />
@@ -58,8 +57,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
           </Text>
         </Container>
       </GridItem>
-
-      <CartDrawer isOpen={isOpen} onClose={onClose} />
     </Grid>
   )
 }

@@ -21,13 +21,12 @@ import {
   Img,
   Stack,
   Text,
-  useDisclosure,
   useToast,
 } from '@chakra-ui/react'
 import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import api, { fetcher } from '~/services/axios'
-import CartDrawer from '~/components/cart-drawer'
+import { useCartDrawer } from '~/contexts/cart-drawer'
 
 const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const toast = useToast()
@@ -40,7 +39,7 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   )
   const [quantity, setQuantity] = useState(1)
   const { isValidating } = useSWR<ItemType[]>('/cart', fetcher)
-  const { isOpen, onOpen, onClose } = useDisclosure({ id: 'cart' })
+  const { onOpenCartDrawer } = useCartDrawer()
 
   const item = data?.[0]
 
@@ -60,7 +59,7 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         isClosable: true,
       })
 
-      onOpen()
+      onOpenCartDrawer()
     } catch (error) {
       toast({
         title: 'Something went wrong',
@@ -125,8 +124,6 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
           </Stack>
         </Flex>
       </Flex>
-
-      <CartDrawer isOpen={isOpen} onClose={onClose} />
     </Flex>
   )
 }
