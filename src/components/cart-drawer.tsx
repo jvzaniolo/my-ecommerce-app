@@ -31,7 +31,7 @@ type CartDrawerProps = {
 const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const { onCloseCartDrawer } = useCartDrawer()
   const { data: items } = useSWR<Item[]>('/cart', () =>
-    fetcher('http://localhost:3000/cart')
+    fetcher('http://localhost:3333/cart')
   )
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
