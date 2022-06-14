@@ -18,7 +18,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import axios, { fetcher } from '~/services/axios'
+import { fetcher } from '~/services/fetcher'
 import { Item } from '~/types/item'
 import { toUSCurrency } from '~/utils/format'
 import Quantity from './quantity'
@@ -30,7 +30,9 @@ type CartDrawerProps = {
 
 const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const { onCloseCartDrawer } = useCartDrawer()
-  const { data: items } = useSWR<Item[]>('/cart', fetcher)
+  const { data: items } = useSWR<Item[]>('/cart', () =>
+    fetcher('http://localhost:3000/cart')
+  )
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
     if (!items) return
@@ -42,7 +44,13 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
     mutate(
       '/cart',
       async () => {
-        await axios.patch(`/cart/${id}`, { quantity })
+        await fetcher(`http://localhost:3333/cart/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ quantity }),
+        })
 
         return cartWithUpdatedQuantity
       },
@@ -63,7 +71,9 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
     mutate(
       '/cart',
       async () => {
-        await axios.delete(`/cart/${id}`)
+        await fetcher(`http://localhost:3333/cart/${id}`, {
+          method: 'DELETE',
+        })
 
         return filteredCart
       },
