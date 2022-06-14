@@ -20,7 +20,7 @@ import api, { fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: items } = useSWR<Item[]>('/items', fetcher, { fallback })
+  const { data: items } = useSWR<Item[]>('/api/products', fetcher, { fallback })
 
   return items && items.length > 0 ? (
     <SimpleGrid
@@ -65,12 +65,12 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await api.get('/items')
+  const { data } = await api.get('/api/products')
 
   return {
     props: {
       fallback: {
-        '/items': data,
+        '/api/products': data,
       },
     },
   }
