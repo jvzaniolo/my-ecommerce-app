@@ -15,11 +15,29 @@ import {
   LinkOverlay,
   SimpleGrid,
   Text,
+  useToast,
 } from '@chakra-ui/react'
 import { fetcher } from '~/services/fetcher'
 import { toUSCurrency } from '~/utils/format'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+  const toast = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (router.query.error) {
+      toast({
+        title: 'Error',
+        description: 'Your cart is empty',
+        status: 'error',
+        duration: 5000,
+      })
+      router.replace('/')
+    }
+  }, [router, toast])
+
   const { data: items } = useSWR<Item[]>(
     '/api/products',
     () => fetcher('http://localhost:3000/api/products'),

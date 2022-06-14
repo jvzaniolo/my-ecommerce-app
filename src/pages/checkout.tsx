@@ -14,6 +14,7 @@ import Input from '~/components/input'
 import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
+import { Order } from '~/types/order'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
@@ -33,7 +34,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
-    const { data: order } = await fetcher('/orders', {
+    const order = await fetcher<Order>('http://localhost:3333/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,13 +118,23 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const data = await fetcher('http://localhost:3333/cart')
+  const data = await fetcher<Item[]>('http://localhost:3333/cart')
+
+  if (data.length > 0) {
+    return {
+      props: {
+        fallback: {
+          '/cart': data,
+        },
+      },
+    }
+  }
 
   return {
-    props: {
-      fallback: {
-        '/cart': data,
-      },
+    props: {},
+    redirect: {
+      destination: '/?error=cart-is-empty',
+      permanent: false,
     },
   }
 }
