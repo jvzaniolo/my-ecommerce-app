@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -14,7 +13,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import Input from '~/components/input'
-import { supabase } from '~/services/supabase'
+import { useUser } from '~/contexts/user'
 
 type SignUpFormData = {
   email: string
@@ -37,25 +36,22 @@ const SignIn: NextPage = () => {
     resolver: yupResolver(signUpSchema),
   })
   const toast = useToast()
-  const router = useRouter()
+  const { signIn } = useUser()
 
   const onSignIn: SubmitHandler<SignUpFormData> = async data => {
     const { email, password } = data
-    const { error } = await supabase.auth.signIn({ email, password })
 
-    if (error) {
+    await signIn(email, password, error => {
       resetField('password')
       setFocus('password')
 
       toast({
         title: 'Sign In',
-        description: error.message,
+        description: error?.message,
         status: 'error',
         duration: 5000,
       })
-    } else {
-      router.push('/')
-    }
+    })
   }
 
   return (

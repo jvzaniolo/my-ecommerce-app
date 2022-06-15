@@ -16,10 +16,9 @@ import {
 } from '@chakra-ui/react'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { useUser } from '~/contexts/user'
-import { supabase } from '~/services/supabase'
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const { session } = useUser()
+  const { session, signOut } = useUser()
   const { onOpenCartDrawer } = useCartDrawer()
 
   return (
@@ -50,10 +49,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
               />
 
               {session ? (
-                <Button
-                  colorScheme="purple"
-                  onClick={() => supabase.auth.signOut()}
-                >
+                <Button colorScheme="purple" onClick={() => signOut()}>
                   Sign Out
                 </Button>
               ) : (

@@ -6,6 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button, Center, Container, Flex, Heading } from '@chakra-ui/react'
 import Input from '~/components/input'
 import { supabase } from '~/services/supabase'
+import { useUser } from '~/contexts/user'
 
 type SignUpFormData = {
   email: string
@@ -30,10 +31,12 @@ const SignUp: NextPage = () => {
   } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
   })
+  const { signUp } = useUser()
 
   const onSignUp: SubmitHandler<SignUpFormData> = async data => {
     const { email, password } = data
-    await supabase.auth.signUp({ email, password })
+
+    await signUp(email, password)
   }
 
   return (
