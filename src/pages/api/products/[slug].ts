@@ -7,7 +7,7 @@ const handler: NextApiHandler = async (req, res) => {
   switch (req.method) {
     case 'GET': {
       const { data, error, status } = await supabase
-        .from('products')
+        .from('product')
         .select('*')
         .eq('slug', slug)
         .single()
