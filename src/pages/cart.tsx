@@ -1,5 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next'
-import type { Item } from '~/types/item'
+import type { CartItemWithProduct } from '~/lib/cart'
 import type { Fallback } from '~/types/swr'
 
 import Image from 'next/image'
@@ -20,19 +20,13 @@ import { toUSCurrency } from '~/utils/format'
 import Quantity from '~/components/quantity'
 import OrderSummary from '~/components/order-summary'
 
-type Cart = {
-  id: string
-  quantity: number
-  product: Item
-}
-
 /**
  * @deprecated
  * @see Using CartDrawer for now
  * @see src/components/cart-drawer.tsx
  */
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: cart } = useSWR<Cart[]>(
+  const { data: cart } = useSWR<CartItemWithProduct[]>(
     '/cart',
     () => fetcher('http://localhost:3000/api/cart'),
     { fallback }

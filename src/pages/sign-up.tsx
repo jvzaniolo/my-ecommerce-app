@@ -5,7 +5,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button, Center, Container, Flex, Heading } from '@chakra-ui/react'
 import Input from '~/components/input'
-import { supabase } from '~/services/supabase'
 import { useUser } from '~/contexts/user'
 
 type SignUpFormData = {

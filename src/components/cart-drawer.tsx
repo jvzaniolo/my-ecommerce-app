@@ -19,7 +19,7 @@ import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { fetcher } from '~/services/fetcher'
-import { Item } from '~/types/item'
+import type { CartItemWithProduct } from '~/lib/cart'
 import { toUSCurrency } from '~/utils/format'
 import Quantity from './quantity'
 
@@ -30,21 +30,21 @@ type CartDrawerProps = {
 
 const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const { onCloseCartDrawer } = useCartDrawer()
-  const { data: items } = useSWR<Item[]>('/cart', () =>
-    fetcher('http://localhost:3333/cart')
+  const { data: cart } = useSWR<CartItemWithProduct[]>('/cart', () =>
+    fetcher('http://localhost:3000/api/cart')
   )
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
-    if (!items) return
+    if (!cart) return
 
-    const cartWithUpdatedQuantity = items.map(item =>
+    const cartWithUpdatedQuantity = cart.map(item =>
       item.id === id ? { ...item, quantity } : item
     )
 
     mutate(
       '/cart',
       async () => {
-        await fetcher(`http://localhost:3333/cart/${id}`, {
+        await fetcher(`http://localhost:3000/api/cart/${id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -64,14 +64,14 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   }
 
   async function onRemoveCartItem(id: string) {
-    if (!items) return
+    if (!cart) return
 
-    const filteredCart = items.filter(item => item.id !== id)
+    const filteredCart = cart.filter(item => item.id !== id)
 
     mutate(
       '/cart',
       async () => {
-        await fetcher(`http://localhost:3333/cart/${id}`, {
+        await fetcher(`http://localhost:3000/api/cart/${id}`, {
           method: 'DELETE',
         })
 
@@ -101,24 +101,24 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
 
         <DrawerBody>
           <Stack spacing="8">
-            {items?.map(item => (
+            {cart?.map(item => (
               <Flex key={item.id} gap="3">
                 <AspectRatio ratio={1} flex="1">
                   <Img
                     as={Image}
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.image}
+                    alt={item.product.name}
                     layout="fill"
                     objectFit="cover"
                   />
                 </AspectRatio>
                 <Flex flex="2" direction="column" justify="space-between">
                   <Heading as="h3" size="md" fontWeight="medium">
-                    {item.name}
+                    {item.product.name}
                   </Heading>
                   <Flex justify="space-between">
                     <Text fontSize="lg" fontWeight="semibold">
-                      {toUSCurrency(item.price * item.quantity)}
+                      {toUSCurrency(item.product.price * item.quantity)}
                     </Text>
                     <Button
                       variant="link"
@@ -130,7 +130,7 @@ const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <Quantity
                     value={item.quantity}
                     onChange={value => onUpdateItemQuantity(item.id, value)}
-                    max={item.stock}
+                    max={item.product.stock}
                   />
                 </Flex>
               </Flex>

@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import type { SubmitHandler } from 'react-hook-form'
-import type { Item } from '~/types/item'
 import type { Fallback } from '~/types/swr'
 import type { FormData } from '~/types/checkout-form'
 
@@ -15,12 +14,13 @@ import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 import { Order } from '~/types/order'
+import type { CartItemWithProduct } from '~/lib/cart'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
-  const { data: cart, mutate } = useSWR<Item[]>(
+  const { data: cart, mutate } = useSWR<CartItemWithProduct[]>(
     '/cart',
-    () => fetcher('http://localhost:3333/cart'),
+    () => fetcher('http://localhost:3000/api/cart'),
     { fallback }
   )
   const {
@@ -34,12 +34,12 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
-    const order = await fetcher<Order>('http://localhost:3333/orders', {
+    const order = await fetcher<Order>('http://localhost:3000/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...data, items: cart }),
+      // body: JSON.stringify({ cart_id: cart?.id }),
     })
 
     mutate([])
@@ -118,7 +118,9 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const data = await fetcher<Item[]>('http://localhost:3333/cart')
+  const { data } = await fetcher<CartItemWithProduct[]>(
+    'http://localhost:3000/api/cart'
+  )
 
   if (data.length > 0) {
     return {
