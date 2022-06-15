@@ -9,6 +9,7 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { fetcher } from '~/services/fetcher'
 import { supabase } from '~/services/supabase'
 
 type UserContextValue = {
@@ -42,9 +43,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(session?.user ?? null)
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+      (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
+
+        if (session) {
+          fetcher('/api/auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ event, session }),
+          })
+        }
       }
     )
 
