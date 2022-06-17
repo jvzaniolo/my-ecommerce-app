@@ -14,12 +14,12 @@ import OrderSummary from '~/components/order-summary'
 import ShippingForm from '~/components/shipping-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 import { Order } from '~/types/order'
-import type { CartItemWithProduct } from '~/lib/cart'
+import type { CartItem } from '~/lib/cart'
 
 const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
-  const { data: cart, mutate } = useSWR<CartItemWithProduct[]>(
-    '/cart',
+  const { data: cart, mutate } = useSWR<CartItem[]>(
+    '/api/cart',
     () => fetcher('http://localhost:3000/api/cart'),
     { fallback }
   )
@@ -118,15 +118,13 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await fetcher<CartItemWithProduct[]>(
-    'http://localhost:3000/api/cart'
-  )
+  const data = await fetcher<CartItem[]>('http://localhost:3000/api/cart')
 
   if (data.length > 0) {
     return {
       props: {
         fallback: {
-          '/cart': data,
+          '/api/cart': data,
         },
       },
     }
