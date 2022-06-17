@@ -14,9 +14,5 @@ export type Product = {
 export const getProducts = <T>(columns = '*') =>
   supabase.from<T>('product').select(columns)
 
-export const getProductBySlug = <T>(slug: T[keyof T], columns = '*') =>
-  supabase
-    .from<T>('product')
-    .select(columns)
-    .eq('slug' as keyof T, slug)
-    .single()
+export const getProductBySlug = <T>(slug: string, columns = '*') =>
+  supabase.from<T>('product').select(columns).match({ slug }).single()
