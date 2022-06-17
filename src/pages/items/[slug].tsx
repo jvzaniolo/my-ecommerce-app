@@ -1,6 +1,6 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import type { Fallback } from '~/types/swr'
-import type { Item as ItemType } from '~/types/item'
+import type { Product } from '~/lib/product'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -27,32 +27,35 @@ import Quantity from '~/components/quantity'
 import { toUSCurrency } from '~/utils/format'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { fetcher } from '~/services/fetcher'
+import { useForm } from 'react-hook-form'
 
 const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const toast = useToast()
   const router = useRouter()
   const { slug } = router.query
-  const { data: item } = useSWR<ItemType>(
+  const { onOpenCartDrawer } = useCartDrawer()
+  const [quantity, setQuantity] = useState(1)
+  const { data: item } = useSWR<Product>(
     `/api/products/${slug}`,
     () => fetcher(`http://localhost:3000/api/products/${slug}`),
-    {
-      fallback,
-    }
+    { fallback }
   )
-  const [quantity, setQuantity] = useState(1)
-  const { onOpenCartDrawer } = useCartDrawer()
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm()
 
   if (!item) return <>Loading...</>
 
   async function onAddToCart() {
     try {
-      await mutate('/cart', () => {
-        fetcher('http://localhost:3333/cart', {
+      await mutate('/cart', async () => {
+        await fetcher('http://localhost:3000/api/cart', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ ...item, quantity }),
+          body: JSON.stringify({ product_id: item?.id, quantity }),
         })
       })
 
@@ -101,7 +104,13 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
             />
           </AspectRatio>
         </Box>
-        <Flex flex="2" direction="column" gap="3">
+        <Flex
+          as="form"
+          flex="2"
+          direction="column"
+          gap="3"
+          onSubmit={handleSubmit(onAddToCart)}
+        >
           <Flex justify="space-between">
             <Heading as="h2">{item.name}</Heading>
             <Heading as="h3">{toUSCurrency(item.price)}</Heading>
@@ -112,15 +121,16 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
           <Stack mt="8">
             <Quantity
+              max={item.stock}
               value={quantity}
               onChange={value => setQuantity(value)}
-              max={item.stock}
             />
 
             <Button
               w="full"
+              type="submit"
               colorScheme="purple"
-              onClick={onAddToCart}
+              isLoading={isSubmitting}
               leftIcon={<MdOutlineAddShoppingCart />}
             >
               Add to cart
@@ -134,7 +144,7 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { slug } = context.query
-  const data = await fetcher<ItemType>(
+  const data = await fetcher<Product>(
     `http://localhost:3000/api/products/${slug}`
   )
 
