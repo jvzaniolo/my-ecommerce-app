@@ -24,12 +24,12 @@ import {
 import { fetcher } from '~/services/fetcher'
 import { toUSCurrency } from '~/utils/format'
 
-const Purchase: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+const Order: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
   const { id } = router.query
   const { data } = useSWR<[Order]>(
-    `/orders?id=${id}`,
-    () => fetcher(`http://localhost:3333/orders?id=${id}`),
+    `/api/order/${id}`,
+    () => fetcher(`http://localhost:3333/api/order/${id}`),
     { fallback }
   )
 
@@ -103,15 +103,15 @@ const Purchase: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query
-  const order = await fetcher(`http://localhost:3333/orders?id=${id}`)
+  const order = await fetcher(`http://localhost:3000/api/order/${id}`)
 
   return {
     props: {
       fallback: {
-        [`/orders?id=${id}`]: order,
+        [`/api/order/${id}`]: order,
       },
     },
   }
 }
 
-export default Purchase
+export default Order
