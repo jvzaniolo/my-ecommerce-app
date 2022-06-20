@@ -4,15 +4,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting started
 
-First, run the mock server:
-
-```bash
-npm run server
-# or
-yarn server
-```
-
-In a new terminal, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
@@ -27,7 +19,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 This project uses the following resources
 
 - TypeScript - as the programming language
-- [JSON Server](https://github.com/typicode/json-server) - to create a fake API
+- [Supabase](https://supabase.com/) - as the back-end
 - [React](https://reactjs.org/) - as the UI library
 - [Next.js](https://nextjs.org) - the UI framework
 - [SWR](https://swr.vercel.app/) - to handle data fetching and server state
