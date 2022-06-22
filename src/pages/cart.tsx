@@ -27,43 +27,13 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   const { data: cart } = useSWR('/api/cart', { fallback })
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
-    const cartWithUpdatedQuantity = cart.map((item: any) =>
-      item.id === id ? { ...item, quantity } : item
-    )
-
-    mutate(
-      '/api/cart',
-      async () => {
-        await axios.patch(`/api/cart/${id}`, { quantity })
-
-        return cartWithUpdatedQuantity
-      },
-      {
-        optimisticData: cartWithUpdatedQuantity,
-        rollbackOnError: true,
-        revalidate: false,
-        populateCache: true,
-      }
-    )
+    await axios.patch(`/api/cart/${id}`, { quantity })
+    mutate(`/api/cart`)
   }
 
   async function onRemoveCartItem(id: string) {
-    const filteredCart = cart.filter((item: any) => item.id !== id)
-
-    mutate(
-      '/api/cart',
-      async () => {
-        await axios.delete(`/api/cart/${id}`)
-
-        return filteredCart
-      },
-      {
-        optimisticData: filteredCart,
-        rollbackOnError: true,
-        revalidate: false,
-        populateCache: true,
-      }
-    )
+    await axios.delete(`/api/cart/${id}`)
+    mutate('/api/cart')
   }
 
   return (
@@ -74,8 +44,8 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 
       <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
         <Stack as="ul" flex="2" spacing="4">
-          {cart && cart.length > 0 ? (
-            cart?.map((item: any) => (
+          {cart ? (
+            cart.items.map((item: any) => (
               <Flex
                 key={item.id}
                 as="li"
@@ -103,9 +73,9 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
                     {item.product.description}
                   </Text>
                   <Quantity
+                    max={item.product.stock}
                     value={item.quantity}
                     onChange={value => onUpdateItemQuantity(item.id, value)}
-                    max={item.product.stock}
                   />
 
                   <Flex justify="space-between" mt="auto">
