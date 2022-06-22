@@ -19,7 +19,7 @@ import Link from 'next/link'
 import { FC } from 'react'
 import useSWR, { mutate } from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { fetcher } from '~/services/fetcher'
+import { axios } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 import { Quantity } from './quantity'
 
@@ -30,32 +30,16 @@ type CartDrawerProps = {
 
 export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const { onCloseCartDrawer } = useCartDrawer()
-  const { data: cart } = useSWR('/api/cart', () =>
-    fetcher<any>('http://localhost:3000/api/cart')
-  )
+  const { data: cart } = useSWR('/api/cart')
 
   async function onUpdateItemQuantity(cartItemId: string, quantity: number) {
-    if (!cart) return
-
-    mutate('/cart', async () => {
-      await fetcher(`http://localhost:3000/api/cart/${cartItemId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ quantity }),
-      })
-    })
+    await axios.patch(`/api/cart/${cartItemId}`, { quantity })
+    mutate('/cart')
   }
 
   async function onRemoveCartItem(cartItemId: string) {
-    if (!cart) return
-
-    mutate('/cart', async () => {
-      await fetcher(`http://localhost:3000/api/cart/${cartItemId}`, {
-        method: 'DELETE',
-      })
-    })
+    await axios.delete(`/api/cart/${cartItemId}`)
+    mutate('/cart')
   }
 
   return (

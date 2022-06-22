@@ -3,15 +3,19 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { GetServerSideProps, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
+import useSWR, { SWRConfiguration } from 'swr'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { fetcher } from '~/services/fetcher'
+import { axios } from '~/services/axios'
 import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
-const Checkout: NextPage<{ cart: any }> = ({ cart }) => {
+const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
+  fallback,
+}) => {
   const router = useRouter()
+  const { data: cart } = useSWR('/api/cart', { fallback })
   const {
     control,
     handleSubmit,
@@ -23,12 +27,8 @@ const Checkout: NextPage<{ cart: any }> = ({ cart }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
-    const order = await fetcher<any>('http://localhost:3000/api/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ cartId: cart.id }),
+    const { data: order } = await axios.post('/api/orders', {
+      cartId: cart.id,
     })
 
     router.push(`/orders/${order.id}`)
@@ -105,23 +105,24 @@ const Checkout: NextPage<{ cart: any }> = ({ cart }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const cart = await fetcher('http://localhost:3000/api/cart')
-
-  if (cart) {
-    return {
-      props: {
-        cart,
-      },
-    }
-  }
+  const { data } = await axios.get('/api/cart')
 
   return {
-    props: {},
-    redirect: {
-      destination: '/?error=cart-is-empty',
-      permanent: false,
+    props: {
+      fallback: {
+        '/api/cart': data,
+      },
     },
   }
+
+  /** @deprecated */
+  // return {
+  //   props: {},
+  //   redirect: {
+  //     destination: '/?error=cart-is-empty',
+  //     permanent: false,
+  //   },
+  // }
 }
 
 export default Checkout

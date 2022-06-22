@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { fetcher } from '~/services/fetcher'
+import { axios } from '~/services/axios'
 import { supabase } from '~/services/supabase'
 
 type UserContextValue = {
@@ -47,13 +47,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null)
 
         if (session) {
-          fetcher('/api/auth', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ event, session }),
-          })
+          axios.post('/api/auth', { event, session })
         }
       }
     )

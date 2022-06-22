@@ -11,10 +11,9 @@ import {
 import { GetServerSideProps, NextPage } from 'next'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import useSWR, { mutate } from 'swr'
+import useSWR, { mutate, SWRConfiguration } from 'swr'
 import { Quantity } from '~/components/quantity'
-import { fetcher } from '~/services/fetcher'
-import { Fallback } from '~/types/swr'
+import { axios } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 /**
@@ -22,30 +21,20 @@ import { toUSCurrency } from '~/utils/format'
  * @see Using CartDrawer for now
  * @see src/components/cart-drawer.tsx
  */
-const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: cart } = useSWR<any[]>(
-    '/api/cart',
-    () => fetcher('http://localhost:3000/api/cart'),
-    { fallback }
-  )
+const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
+  fallback,
+}) => {
+  const { data: cart } = useSWR('/api/cart', { fallback })
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
-    if (!cart) return
-
-    const cartWithUpdatedQuantity = cart.map(item =>
+    const cartWithUpdatedQuantity = cart.map((item: any) =>
       item.id === id ? { ...item, quantity } : item
     )
 
     mutate(
       '/api/cart',
       async () => {
-        await fetcher(`http://localhost:3000/api/cart/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ quantity }),
-        })
+        await axios.patch(`/api/cart/${id}`, { quantity })
 
         return cartWithUpdatedQuantity
       },
@@ -59,16 +48,12 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   }
 
   async function onRemoveCartItem(id: string) {
-    if (!cart) return
-
-    const filteredCart = cart.filter(item => item.id !== id)
+    const filteredCart = cart.filter((item: any) => item.id !== id)
 
     mutate(
       '/api/cart',
       async () => {
-        await fetcher(`http://localhost:3333/cart/${id}`, {
-          method: 'DELETE',
-        })
+        await axios.delete(`/api/cart/${id}`)
 
         return filteredCart
       },
@@ -90,7 +75,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
       <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
         <Stack as="ul" flex="2" spacing="4">
           {cart && cart.length > 0 ? (
-            cart?.map(item => (
+            cart?.map((item: any) => (
               <Flex
                 key={item.id}
                 as="li"
@@ -157,7 +142,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const data = await fetcher('http://localhost:3000/api/cart')
+  const { data } = await axios.get('/api/cart')
 
   return {
     props: {

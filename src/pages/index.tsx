@@ -8,31 +8,18 @@ import {
   LinkOverlay,
   SimpleGrid,
   Text,
-  useToast,
 } from '@chakra-ui/react'
 import { GetServerSideProps, NextPage } from 'next'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
-import { useRouter } from 'next/router'
-import { useEffect } from 'react'
-import { prisma } from '~/services/prisma'
+import useSWR, { SWRConfiguration } from 'swr'
+import { axios } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
-const Home: NextPage<{ items: any[] }> = ({ items }) => {
-  const toast = useToast()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (router.query.error) {
-      toast({
-        title: 'Error',
-        description: 'Your cart is empty',
-        status: 'error',
-        duration: 5000,
-      })
-      router.replace('/')
-    }
-  }, [router, toast])
+const Home: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
+  fallback,
+}) => {
+  const { data: items } = useSWR('/api/products', { fallback })
 
   return items.length > 0 ? (
     <SimpleGrid
@@ -42,7 +29,7 @@ const Home: NextPage<{ items: any[] }> = ({ items }) => {
         lg: 'repeat(auto-fit, minmax(300px, 0fr))',
       }}
     >
-      {items.map(item => (
+      {items.map((item: any) => (
         <LinkBox key={item.id} shadow="md" overflow="hidden" borderRadius="lg">
           <AspectRatio ratio={4 / 3}>
             <Img
@@ -77,15 +64,13 @@ const Home: NextPage<{ items: any[] }> = ({ items }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const items = await prisma.product.findMany()
+  const { data } = await axios.get('/api/products')
 
   return {
     props: {
-      items: items.map((item: any) => ({
-        ...item,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      })),
+      fallback: {
+        '/api/products': data,
+      },
     },
   }
 }

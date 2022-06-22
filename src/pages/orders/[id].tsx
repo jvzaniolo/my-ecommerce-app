@@ -17,21 +17,16 @@ import { GetServerSideProps, NextPage } from 'next'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
-import useSWR from 'swr'
-import { fetcher } from '~/services/fetcher'
-import { Fallback } from '~/types/swr'
+import useSWR, { SWRConfiguration } from 'swr'
+import { axios } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
-const Order: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
+  fallback,
+}) => {
   const router = useRouter()
   const { id } = router.query
-  const { data } = useSWR<[any]>(
-    `/api/order/${id}`,
-    () => fetcher(`http://localhost:3333/api/order/${id}`),
-    { fallback }
-  )
-
-  const order = data?.[0]
+  const { data: order } = useSWR(`/api/order/${id}`, { fallback })
 
   if (!order) return <>Loading...</>
 
@@ -101,7 +96,7 @@ const Order: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query
-  const order = await fetcher(`http://localhost:3000/api/order/${id}`)
+  const order = await axios.get(`/api/order/${id}`)
 
   return {
     props: {
