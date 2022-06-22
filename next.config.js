@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['static.cdnlive.com.br', 'picsum.photos'],
+    domains: ['randompicturegenerator.com'],
   },
 }
 
