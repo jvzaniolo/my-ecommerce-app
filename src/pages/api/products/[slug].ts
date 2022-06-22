@@ -1,4 +1,4 @@
-import type { NextApiHandler } from 'next'
+import { NextApiHandler } from 'next'
 import { supabase } from '~/services/supabase'
 
 const handler: NextApiHandler = async (req, res) => {
