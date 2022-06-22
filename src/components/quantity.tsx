@@ -1,4 +1,3 @@
-import { MdAdd, MdRemove } from 'react-icons/md'
 import {
   HStack,
   Icon,
@@ -6,6 +5,8 @@ import {
   Input,
   useNumberInput,
 } from '@chakra-ui/react'
+import { FC } from 'react'
+import { MdAdd, MdRemove } from 'react-icons/md'
 
 type QuantityProps = {
   max: number
@@ -13,7 +14,7 @@ type QuantityProps = {
   onChange: (value: number) => void
 }
 
-const Quantity = ({ max, value, onChange }: QuantityProps) => {
+export const Quantity: FC<QuantityProps> = ({ max, value, onChange }) => {
   const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
     useNumberInput({
       min: 1,
@@ -46,5 +47,3 @@ const Quantity = ({ max, value, onChange }: QuantityProps) => {
     </HStack>
   )
 }
-
-export default Quantity

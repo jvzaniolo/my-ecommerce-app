@@ -1,20 +1,15 @@
-import {
-  type Control,
-  type UseFormRegister,
-  useFormState,
-} from 'react-hook-form'
-import type { FormData } from '~/types/checkout-form'
-
 import { Heading, Stack } from '@chakra-ui/react'
-import Input from './input'
+import { FC } from 'react'
+import { Control, UseFormRegister, useFormState } from 'react-hook-form'
+import { FormData } from '~/types/checkout-form'
+import { Input } from './input'
 
-const ShippingForm = ({
-  register,
-  control,
-}: {
+type ShippingFormType = {
   control: Control<FormData>
   register: UseFormRegister<FormData>
-}) => {
+}
+
+export const ShippingForm: FC<ShippingFormType> = ({ register, control }) => {
   const { errors } = useFormState({ control })
 
   return (
@@ -95,5 +90,3 @@ const ShippingForm = ({
     </>
   )
 }
-
-export default ShippingForm

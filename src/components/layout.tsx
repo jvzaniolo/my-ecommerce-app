@@ -1,7 +1,3 @@
-import type { ReactNode } from 'react'
-
-import Link from 'next/link'
-import { MdOutlineShoppingCart } from 'react-icons/md'
 import {
   Button,
   Container,
@@ -14,10 +10,13 @@ import {
   Spacer,
   Text,
 } from '@chakra-ui/react'
+import Link from 'next/link'
+import { FC, ReactNode } from 'react'
+import { MdOutlineShoppingCart } from 'react-icons/md'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { useUser } from '~/contexts/user'
 
-const Layout = ({ children }: { children: ReactNode }) => {
+export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { session, signOut } = useUser()
   const { onOpenCartDrawer } = useCartDrawer()
 
@@ -80,5 +79,3 @@ const Layout = ({ children }: { children: ReactNode }) => {
     </Grid>
   )
 }
-
-export default Layout

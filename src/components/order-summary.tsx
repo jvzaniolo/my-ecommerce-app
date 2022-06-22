@@ -1,18 +1,15 @@
-import type { ReactNode } from 'react'
-import type { Item } from '~/types/item'
-
 import { Box, Divider, Flex, Heading, Stack, Text } from '@chakra-ui/react'
+import { FC, ReactNode } from 'react'
 import { toUSCurrency } from '~/utils/format'
 
-const OrderSummary = ({
-  cartItems,
-  children,
-}: {
-  cartItems: Item[] | undefined
+type OrderSummary = {
+  cartItems: any[] | undefined
   children: ReactNode
-}) => {
+}
+
+export const OrderSummary: FC<OrderSummary> = ({ cartItems, children }) => {
   const cartTotal = cartItems?.reduce((acc, item) => {
-    return acc + item.price * item.quantity
+    return acc + item.product.price * item.quantity
   }, 0)
 
   return (
@@ -20,10 +17,10 @@ const OrderSummary = ({
       <Heading size="lg">Order Summary</Heading>
       {cartItems?.map(item => (
         <Box key={item.id}>
-          <Text noOfLines={1}>{item.name}</Text>
+          <Text noOfLines={1}>{item.product.name}</Text>
           <Flex justify="space-between">
             <Text color="gray.500">Quantity: {item.quantity}</Text>
-            <Text>{toUSCurrency(item.price * item.quantity)}</Text>
+            <Text>{toUSCurrency(item.product.price * item.quantity)}</Text>
           </Flex>
         </Box>
       ))}
@@ -37,5 +34,3 @@ const OrderSummary = ({
     </Stack>
   )
 }
-
-export default OrderSummary

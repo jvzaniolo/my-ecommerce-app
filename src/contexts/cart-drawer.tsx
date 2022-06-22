@@ -1,6 +1,6 @@
 import { useDisclosure } from '@chakra-ui/react'
-import { createContext, type ReactNode, useContext } from 'react'
-import CartDrawer from '~/components/cart-drawer'
+import { createContext, ReactNode, useContext } from 'react'
+import { CartDrawer } from '~/components/cart-drawer'
 
 type CartDrawerContextValue = {
   isCartDrawerOpen: boolean
