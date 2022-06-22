@@ -1,6 +1,5 @@
 import { useToast } from '@chakra-ui/react'
-import type { ApiError, Session, User } from '@supabase/supabase-js'
-
+import { ApiError, Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
 import {
   createContext,

@@ -1,10 +1,3 @@
-import type { GetServerSideProps, NextPage } from 'next'
-import type { CartItemWithProduct } from '~/lib/cart'
-import type { Fallback } from '~/types/swr'
-
-import Image from 'next/image'
-import NextLink from 'next/link'
-import useSWR, { mutate } from 'swr'
 import {
   Box,
   Button,
@@ -15,10 +8,14 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
+import { GetServerSideProps, NextPage } from 'next'
+import Image from 'next/image'
+import NextLink from 'next/link'
+import useSWR, { mutate } from 'swr'
+import { Quantity } from '~/components/quantity'
 import { fetcher } from '~/services/fetcher'
+import { Fallback } from '~/types/swr'
 import { toUSCurrency } from '~/utils/format'
-import Quantity from '~/components/quantity'
-import OrderSummary from '~/components/order-summary'
 
 /**
  * @deprecated
@@ -26,8 +23,8 @@ import OrderSummary from '~/components/order-summary'
  * @see src/components/cart-drawer.tsx
  */
 const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
-  const { data: cart } = useSWR<CartItemWithProduct[]>(
-    '/cart',
+  const { data: cart } = useSWR<any[]>(
+    '/api/cart',
     () => fetcher('http://localhost:3000/api/cart'),
     { fallback }
   )
@@ -40,7 +37,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     )
 
     mutate(
-      '/cart',
+      '/api/cart',
       async () => {
         await fetcher(`http://localhost:3000/api/cart/${id}`, {
           method: 'PATCH',
@@ -67,7 +64,7 @@ const Cart: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     const filteredCart = cart.filter(item => item.id !== id)
 
     mutate(
-      '/cart',
+      '/api/cart',
       async () => {
         await fetcher(`http://localhost:3333/cart/${id}`, {
           method: 'DELETE',
@@ -165,7 +162,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       fallback: {
-        '/cart': data,
+        '/api/cart': data,
       },
     },
   }

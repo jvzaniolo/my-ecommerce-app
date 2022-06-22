@@ -1,11 +1,3 @@
-import type { GetServerSideProps, NextPage } from 'next'
-import type { Order } from '~/types/order'
-import type { Fallback } from '~/types/swr'
-
-import NextLink from 'next/link'
-import { useRouter } from 'next/router'
-import useSWR from 'swr'
-import { MdChevronLeft } from 'react-icons/md'
 import {
   Alert,
   AlertDescription,
@@ -16,18 +8,24 @@ import {
   Divider,
   Flex,
   Heading,
+  Icon,
+  Link,
   Stack,
   Text,
-  Link,
-  Icon,
 } from '@chakra-ui/react'
+import { GetServerSideProps, NextPage } from 'next'
+import NextLink from 'next/link'
+import { useRouter } from 'next/router'
+import { MdChevronLeft } from 'react-icons/md'
+import useSWR from 'swr'
 import { fetcher } from '~/services/fetcher'
+import { Fallback } from '~/types/swr'
 import { toUSCurrency } from '~/utils/format'
 
 const Order: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   const router = useRouter()
   const { id } = router.query
-  const { data } = useSWR<[Order]>(
+  const { data } = useSWR<[any]>(
     `/api/order/${id}`,
     () => fetcher(`http://localhost:3333/api/order/${id}`),
     { fallback }
@@ -64,7 +62,7 @@ const Order: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
             Items
           </Heading>
 
-          {order.items.map(item => (
+          {order.items.map((item: any) => (
             <Flex key={item.id}>
               <Flex w="full" justify="space-between">
                 <Text>

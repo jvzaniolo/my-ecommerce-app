@@ -1,10 +1,9 @@
-import type { NextPage } from 'next'
-
-import * as yup from 'yup'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { SubmitHandler, useForm } from 'react-hook-form'
 import { Button, Center, Container, Flex, Heading } from '@chakra-ui/react'
-import Input from '~/components/input'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { NextPage } from 'next'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { Input } from '~/components/input'
 import { useUser } from '~/contexts/user'
 
 type SignUpFormData = {

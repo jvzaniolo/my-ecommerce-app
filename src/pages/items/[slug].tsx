@@ -1,13 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next'
-import type { Fallback } from '~/types/swr'
-import type { Product } from '~/lib/product'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
-import useSWR, { mutate } from 'swr'
-import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import {
   AspectRatio,
   Box,
@@ -23,41 +15,42 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react'
-import Quantity from '~/components/quantity'
-import { toUSCurrency } from '~/utils/format'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { MdOutlineAddShoppingCart } from 'react-icons/md'
+import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { fetcher } from '~/services/fetcher'
-import { useForm } from 'react-hook-form'
+import { prisma } from '~/services/prisma'
+import { toUSCurrency } from '~/utils/format'
 
-const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+const Item: NextPage<{ item: any }> = ({ item }) => {
   const toast = useToast()
   const router = useRouter()
-  const { slug } = router.query
   const { onOpenCartDrawer } = useCartDrawer()
   const [quantity, setQuantity] = useState(1)
-  const { data: item } = useSWR<Product>(
-    `/api/products/${slug}`,
-    () => fetcher(`http://localhost:3000/api/products/${slug}`),
-    { fallback }
-  )
   const {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm()
 
-  if (!item) return <>Loading...</>
-
   async function onAddToCart() {
     try {
-      await mutate('/cart', async () => {
-        await fetcher('http://localhost:3000/api/cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ product_id: item?.id, quantity }),
-        })
+      const cart = await fetcher(`/api/cart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: item.id,
+          quantity,
+        }),
       })
+
+      console.log({ cart })
 
       toast({
         title: 'Added to cart',
@@ -143,15 +136,15 @@ const Item: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async context => {
-  const { slug } = context.query
-  const data = await fetcher<Product>(
-    `http://localhost:3000/api/products/${slug}`
-  )
+  const slug = context.query.slug as string
+  const item = await prisma.product.findUnique({ where: { slug } })
 
   return {
     props: {
-      fallback: {
-        [`/api/products/${slug}`]: data,
+      item: {
+        ...item,
+        createdAt: item?.createdAt.toISOString(),
+        updatedAt: item?.updatedAt.toISOString(),
       },
     },
   }

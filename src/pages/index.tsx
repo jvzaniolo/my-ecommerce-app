@@ -1,10 +1,3 @@
-import type { GetServerSideProps, NextPage } from 'next'
-import type { Item } from '~/types/item'
-import type { Fallback } from '~/types/swr'
-
-import NextLink from 'next/link'
-import NextImage from 'next/image'
-import useSWR from 'swr'
 import {
   AspectRatio,
   Box,
@@ -17,12 +10,15 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react'
-import { fetcher } from '~/services/fetcher'
-import { toUSCurrency } from '~/utils/format'
+import { GetServerSideProps, NextPage } from 'next'
+import NextImage from 'next/image'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { prisma } from '~/services/prisma'
+import { toUSCurrency } from '~/utils/format'
 
-const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+const Home: NextPage<{ items: any[] }> = ({ items }) => {
   const toast = useToast()
   const router = useRouter()
 
@@ -38,13 +34,7 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
     }
   }, [router, toast])
 
-  const { data: items } = useSWR<Item[]>(
-    '/api/products',
-    () => fetcher('http://localhost:3000/api/products'),
-    { fallback }
-  )
-
-  return items && items.length > 0 ? (
+  return items.length > 0 ? (
     <SimpleGrid
       gap="4"
       templateColumns={{
@@ -52,7 +42,7 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         lg: 'repeat(auto-fit, minmax(300px, 0fr))',
       }}
     >
-      {items?.map(item => (
+      {items.map(item => (
         <LinkBox key={item.id} shadow="md" overflow="hidden" borderRadius="lg">
           <AspectRatio ratio={4 / 3}>
             <Img
@@ -87,13 +77,15 @@ const Home: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const data = await fetcher<Item[]>('http://localhost:3000/api/products')
+  const items = await prisma.product.findMany()
 
   return {
     props: {
-      fallback: {
-        '/api/products': data,
-      },
+      items: items.map((item: any) => ({
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      })),
     },
   }
 }

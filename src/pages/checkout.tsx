@@ -1,28 +1,17 @@
-import type { GetServerSideProps, NextPage } from 'next'
-import type { SubmitHandler } from 'react-hook-form'
-import type { Fallback } from '~/types/swr'
-import type { FormData } from '~/types/checkout-form'
-
-import { useRouter } from 'next/router'
-import useSWR from 'swr'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Checkbox, Flex, Heading, Stack } from '@chakra-ui/react'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { GetServerSideProps, NextPage } from 'next'
+import { useRouter } from 'next/router'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { Input } from '~/components/input'
+import { OrderSummary } from '~/components/order-summary'
+import { ShippingForm } from '~/components/shipping-form'
 import { fetcher } from '~/services/fetcher'
-import Input from '~/components/input'
-import OrderSummary from '~/components/order-summary'
-import ShippingForm from '~/components/shipping-form'
+import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
-import { Order } from '~/types/order'
-import type { CartItem } from '~/lib/cart'
 
-const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
+const Checkout: NextPage<{ cart: any }> = ({ cart }) => {
   const router = useRouter()
-  const { data: cart, mutate } = useSWR<CartItem[]>(
-    '/api/cart',
-    () => fetcher('http://localhost:3000/api/cart'),
-    { fallback }
-  )
   const {
     control,
     handleSubmit,
@@ -34,17 +23,15 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async data => {
-    const order = await fetcher<Order>('http://localhost:3000/api/orders', {
+    const order = await fetcher<any>('http://localhost:3000/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // body: JSON.stringify({ cart_id: cart?.id }),
+      body: JSON.stringify({ cartId: cart.id }),
     })
 
-    mutate([])
-
-    router.push(`/purchase/${order.id}`)
+    router.push(`/orders/${order.id}`)
   }
 
   return (
@@ -108,7 +95,7 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
         </Flex>
 
         <Box h="sm" flex="1" pos="sticky" top="20">
-          <OrderSummary cartItems={cart}>
+          <OrderSummary cartItems={cart.items}>
             <Button type="submit">Purchase</Button>
           </OrderSummary>
         </Box>
@@ -118,14 +105,12 @@ const Checkout: NextPage<{ fallback: Fallback }> = ({ fallback }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const data = await fetcher<CartItem[]>('http://localhost:3000/api/cart')
+  const cart = await fetcher('http://localhost:3000/api/cart')
 
-  if (data.length > 0) {
+  if (cart) {
     return {
       props: {
-        fallback: {
-          '/api/cart': data,
-        },
+        cart,
       },
     }
   }
