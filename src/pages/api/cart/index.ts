@@ -10,16 +10,17 @@ const handler: NextApiHandler = async (req, res) => {
     const { data, status, error } = await supabase
       .from('cart')
       .select('*, items:cart_item(*, product(*))')
+      .single()
 
     return res.status(status).json(error || data)
   }
 
   if (req.method === 'POST') {
-    const { product_id, quantity } = req.body
+    const { productId, quantity } = req.body
 
-    const { data, error, status } = await supabase.rpc('insert_item_to_cart', {
-      new_product_id: product_id,
-      new_quantity: quantity,
+    const { data, error, status } = await supabase.rpc('create_cart_item', {
+      productid: productId,
+      productquantity: quantity,
     })
 
     return res.status(status).json(error || data)

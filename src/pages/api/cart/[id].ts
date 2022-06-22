@@ -9,13 +9,23 @@ const handler: NextApiHandler = async (req, res) => {
 
   if (req.method === 'PATCH') {
     const { quantity } = req.body
-    const { data, status, error } = await supabase.rpc('update_cart_item', {
-      id,
-      new_quantity: quantity,
-    })
+    const { data, status, error } = await supabase
+      .from('cart_item')
+      .update({
+        quantity,
+      })
+      .match({ id })
+      .single()
 
     return res.status(status).json(error || data)
   } else if (req.method === 'DELETE') {
+    const { data, status, error } = await supabase
+      .from('cart_item')
+      .delete()
+      .match({ id })
+      .single()
+
+    return res.status(status).json(error || data)
   }
 
   res.setHeader('Allow', ['DELETE', 'PATCH'])
