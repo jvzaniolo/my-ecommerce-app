@@ -22,7 +22,4 @@ jobs:
           cache: 'yarn'
       - run: yarn --frozen-lockfile
       - run: yarn build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       # - run: yarn test # skipping tests for now
