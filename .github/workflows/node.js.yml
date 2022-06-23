@@ -14,13 +14,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - shell: bash
       - uses: actions/checkout@v3
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 'latest'
           cache: 'yarn'
-        env: # Or as an environment variable
+        env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       - run: yarn --frozen-lockfile
