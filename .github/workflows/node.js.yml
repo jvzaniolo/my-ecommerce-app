@@ -20,12 +20,10 @@ jobs:
         with:
           node-version: 'latest'
           cache: 'yarn'
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-      - name: Build
-        run: yarn build
+      - run: yarn --frozen-lockfile
+      - run: yarn test
+      - run: yarn build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - name: Tests
-        run: yarn test
+
