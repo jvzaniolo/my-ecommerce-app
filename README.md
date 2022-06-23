@@ -19,7 +19,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 This project uses the following resources
 
 - TypeScript - as the programming language
-- [Supabase](https://supabase.com/) - as the back-end
+- [Supabase](https://supabase.com/) - as the database
 - [React](https://reactjs.org/) - as the UI library
 - [Next.js](https://nextjs.org) - the UI framework
 - [SWR](https://swr.vercel.app/) - to handle data fetching and server state
