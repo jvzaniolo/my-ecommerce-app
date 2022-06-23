@@ -21,7 +21,7 @@ This project uses the following resources
 - TypeScript - as the programming language
 - [Supabase](https://supabase.com/) - as the database
 - [React](https://reactjs.org/) - as the UI library
-- [Next.js](https://nextjs.org) - the UI framework
+- [Next.js](https://nextjs.org) - the full-stack framework
 - [SWR](https://swr.vercel.app/) - to handle data fetching and server state
 - [Chakra UI](https://chakra-ui.com/) - UI Components library
 - [React Hook Forms](https://react-hook-form.com/) - to handle huge forms
