@@ -22,4 +22,5 @@ jobs:
           cache: 'yarn'
       - run: yarn --frozen-lockfile
       - run: yarn build
-      # - run: yarn test # skipping tests for now
+      # - run: yarn test
+      # skipping tests for now
