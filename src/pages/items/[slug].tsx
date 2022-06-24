@@ -24,7 +24,7 @@ import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import useSWR, { SWRConfiguration, useSWRConfig } from 'swr'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { axios } from '~/services/axios'
+import { axios, fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
@@ -35,7 +35,9 @@ const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   const { query } = useRouter()
   const { mutate } = useSWRConfig()
   const { onOpenCartDrawer } = useCartDrawer()
-  const { data: item } = useSWR(`/api/products/${query.slug}`, { fallback })
+  const { data: item } = useSWR(`/api/products/${query.slug}`, fetcher, {
+    fallback,
+  })
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -50,19 +52,11 @@ const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 
       mutate('/api/cart')
 
-      toast({
-        title: 'Added to cart',
-        description: `${item?.name} has been added to your cart`,
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      })
-
       onOpenCartDrawer()
     } catch (error) {
       toast({
-        title: 'Something went wrong',
-        description: `${item?.name} was not added to your cart`,
+        title: 'Error while adding to cart',
+        description: `${item.name} was not added to your cart`,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -111,7 +105,7 @@ const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
               <Heading as="h2">{item.name}</Heading>
               <Heading as="h3">{toUSCurrency(item.price)}</Heading>
             </Flex>
-            <Text>In-Stock: {item.stock}</Text>
+            <Text>{item.stock > 0 ? 'In stock' : 'Out of stock'}</Text>
             <Divider />
             <Text>{item.description}</Text>
 

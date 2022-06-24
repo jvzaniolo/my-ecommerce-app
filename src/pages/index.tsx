@@ -13,13 +13,13 @@ import { GetServerSideProps, NextPage } from 'next'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import useSWR, { SWRConfiguration } from 'swr'
-import { axios } from '~/services/axios'
+import { axios, fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Home: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
-  const { data: items } = useSWR('/api/products', { fallback })
+  const { data: items } = useSWR('/api/products', fetcher, { fallback })
 
   return items.length > 0 ? (
     <SimpleGrid

@@ -12,8 +12,9 @@ import { GetServerSideProps, NextPage } from 'next'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import useSWR, { mutate, SWRConfiguration } from 'swr'
+import { OrderSummary } from '~/components/order-summary'
 import { Quantity } from '~/components/quantity'
-import { axios } from '~/services/axios'
+import { axios, fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 /**
@@ -24,7 +25,7 @@ import { toUSCurrency } from '~/utils/format'
 const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
-  const { data: cart } = useSWR('/api/cart', { fallback })
+  const { data: cart } = useSWR('/api/cart', fetcher, { fallback })
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
     await axios.patch(`/api/cart/${id}`, { quantity })
@@ -44,7 +45,7 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 
       <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
         <Stack as="ul" flex="2" spacing="4">
-          {cart ? (
+          {cart.items.length > 0 ? (
             cart.items.map((item: any) => (
               <Flex
                 key={item.id}
@@ -98,13 +99,13 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
         </Stack>
 
         <Box h="sm" flex="1" pos="sticky" top="20">
-          {/* <OrderSummary cartItems={cart}>
+          <OrderSummary>
             <NextLink href="/checkout" passHref>
               <Button mt="auto" as="a" w="full">
                 Checkout
               </Button>
             </NextLink>
-          </OrderSummary> */}
+          </OrderSummary>
         </Box>
       </Flex>
     </Box>

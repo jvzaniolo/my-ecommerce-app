@@ -7,7 +7,7 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { axios } from '~/services/axios'
+import { axios, fetcher } from '~/services/axios'
 import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
@@ -15,7 +15,7 @@ const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
   const router = useRouter()
-  const { data: cart } = useSWR('/api/cart', { fallback })
+  const { data: cart } = useSWR('/api/cart', fetcher, { fallback })
   const {
     control,
     handleSubmit,
@@ -95,7 +95,7 @@ const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
         </Flex>
 
         <Box h="sm" flex="1" pos="sticky" top="20">
-          <OrderSummary cartItems={cart.items}>
+          <OrderSummary>
             <Button type="submit">Purchase</Button>
           </OrderSummary>
         </Box>

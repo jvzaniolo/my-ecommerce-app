@@ -18,7 +18,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
 import useSWR, { SWRConfiguration } from 'swr'
-import { axios } from '~/services/axios'
+import { axios, fetcher } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 
 const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
@@ -26,7 +26,7 @@ const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 }) => {
   const router = useRouter()
   const { id } = router.query
-  const { data: order } = useSWR(`/api/order/${id}`, { fallback })
+  const { data: order } = useSWR(`/api/order/${id}`, fetcher, { fallback })
 
   if (!order) return <>Loading...</>
 
