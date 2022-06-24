@@ -17,8 +17,9 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { FC } from 'react'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
 import { axios } from '~/services/axios'
 import { toUSCurrency } from '~/utils/format'
 import { Quantity } from './quantity'
@@ -29,17 +30,21 @@ type CartDrawerProps = {
 }
 
 export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
+  const { data: cart } = useSWR('/api/cart', url =>
+    axios.get(url).then(res => res.data)
+  )
   const { onCloseCartDrawer } = useCartDrawer()
-  const { data: cart } = useSWR('/api/cart')
 
-  async function onUpdateItemQuantity(cartItemId: string, quantity: number) {
-    await axios.patch(`/api/cart/${cartItemId}`, { quantity })
-    mutate('/cart')
+  const cartTotal = cart.items.reduce((acc: any, item: any) => {
+    return acc + item.product.price * item.quantity
+  }, 0)
+
+  async function onUpdateItemQuantity(id: string, quantity: number) {
+    optimisticUpdateItemQuantity(cart, id, quantity)
   }
 
-  async function onRemoveCartItem(cartItemId: string) {
-    await axios.delete(`/api/cart/${cartItemId}`)
-    mutate('/cart')
+  async function onRemoveCartItem(id: string) {
+    optimisticDeleteItem(cart, id)
   }
 
   return (
@@ -57,7 +62,7 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
         <DrawerBody>
           <Stack spacing="8">
-            {cart?.items ? (
+            {cart.items.length > 0 ? (
               cart.items.map((item: any) => (
                 <Flex key={item.id} gap="3">
                   <AspectRatio ratio={1} flex="1">
@@ -109,7 +114,7 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 onCloseCartDrawer()
               }}
             >
-              Checkout: {toUSCurrency(cart?.total)}
+              Checkout: {toUSCurrency(cartTotal)}
             </Button>
           </Link>
         </DrawerFooter>
