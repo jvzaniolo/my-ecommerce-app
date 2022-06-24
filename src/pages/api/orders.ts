@@ -1,4 +1,4 @@
-import type { NextApiHandler } from 'next'
+import { NextApiHandler } from 'next'
 import { supabase } from '~/services/supabase'
 
 const handler: NextApiHandler = async (req, res) => {
@@ -21,7 +21,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     if (!cartItems) return res.status(400).json('Missing cart items.')
 
-    const { data: user } = await supabase.auth.api.getUserByCookie(req)
+    const { user } = await supabase.auth.api.getUserByCookie(req)
 
     if (!user) return res.status(401).json('Unauthorized')
 
