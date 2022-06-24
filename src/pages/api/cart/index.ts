@@ -23,6 +23,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const { user } = await supabase.auth.api.getUserByCookie(req)
 
+    // TODO: allow anonymous user to add items to cart
     if (!user) return res.status(401).json('Unauthorized')
 
     const { data: cartId } = await supabase
