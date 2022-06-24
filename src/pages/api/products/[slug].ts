@@ -4,6 +4,8 @@ import { supabase } from '~/services/supabase'
 const handler: NextApiHandler = async (req, res) => {
   const slug = req.query.slug as string
 
+  if (!slug) return res.status(400).json('Missing data')
+
   if (req.method === 'GET') {
     const { data, error, status } = await supabase
       .from('product')
@@ -15,7 +17,7 @@ const handler: NextApiHandler = async (req, res) => {
   }
 
   res.setHeader('Allow', ['GET'])
-  return res.status(405).json({ message: 'Method Not Allowed' })
+  return res.status(405).json('Method Not Allowed')
 }
 
 export default handler

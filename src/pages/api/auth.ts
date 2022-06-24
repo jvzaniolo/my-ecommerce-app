@@ -7,7 +7,7 @@ const handler: NextApiHandler = async (req, res) => {
   }
 
   res.setHeader('Allow', ['POST'])
-  return res.status(405).json({ message: 'Method Not Allowed' })
+  return res.status(405).json('Method Not Allowed')
 }
 
 export default handler

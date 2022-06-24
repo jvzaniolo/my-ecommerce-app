@@ -18,16 +18,35 @@ const handler: NextApiHandler = async (req, res) => {
   if (req.method === 'POST') {
     const { productId, quantity } = req.body
 
-    const { data, error, status } = await supabase.rpc('create_cart_item', {
-      productid: productId,
-      productquantity: quantity,
-    })
+    if (!quantity) return res.status(400).json('Missing quantity.')
+    if (!productId) return res.status(400).json('Missing product id.')
+
+    const { user } = await supabase.auth.api.getUserByCookie(req)
+
+    if (!user) return res.status(401).json('Unauthorized')
+
+    const { data: cartId } = await supabase
+      .from('cart')
+      .select('id')
+      .match({ user_id: user.id })
+      .single()
+
+    const { data, error, status } = await supabase
+      .from('cart_item')
+      .insert({
+        quantity,
+        cart_id: cartId,
+        user_id: user.id,
+        product_id: productId,
+      })
+      .select('*, product(*)')
+      .single()
 
     return res.status(status).json(error || data)
   }
 
   res.setHeader('Allow', ['GET', 'POST'])
-  return res.status(405).json({ message: 'Method Not Allowed' })
+  return res.status(405).json('Method Not Allowed')
 }
 
 export default handler
