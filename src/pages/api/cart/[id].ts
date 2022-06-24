@@ -19,6 +19,7 @@ const handler: NextApiHandler = async (req, res) => {
       .update({
         quantity,
       })
+      .select('*, product(*)')
       .match({ id: cartItemId })
       .single()
 
