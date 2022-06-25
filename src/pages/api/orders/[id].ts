@@ -13,7 +13,6 @@ const handler: NextApiHandler = async (req, res) => {
 
   if (req.method === 'GET') {
     try {
-      console.log(req.query)
       const { id } = await getOrderSchema.validate(req.query)
 
       const { data, error, status } = await supabase
@@ -21,8 +20,6 @@ const handler: NextApiHandler = async (req, res) => {
         .select('*, user(*), items:order_item(*, product(*))')
         .match({ id })
         .single()
-
-      console.log(error)
 
       return res.status(status).json(error || data)
     } catch (error: any) {

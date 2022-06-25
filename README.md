@@ -27,6 +27,12 @@ This project uses the following resources
 - [React Hook Forms](https://react-hook-form.com/) - to handle huge forms
 - [React Testing Library](https://testing-library.com/) - for testing
 
+## Fixes
+
+- [ ] Corrigir Sign Up
+- [ ] Deletar itens do carrinho quando comprar
+- [ ] Mostrar campos de address do Billing
+
 ## Author
 
 - [@jvzaniolo](https://github.com/jvzaniolo)
