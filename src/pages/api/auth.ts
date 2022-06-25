@@ -6,7 +6,11 @@ const handler: NextApiHandler = async (req, res) => {
     return supabase.auth.api.setAuthCookie(req, res)
   }
 
-  res.setHeader('Allow', ['POST'])
+  if (req.method === 'DELETE') {
+    return supabase.auth.api.deleteAuthCookie(req, res, { redirectTo: '/' })
+  }
+
+  res.setHeader('Allow', ['POST', 'DELETE'])
   return res.status(405).json('Method Not Allowed')
 }
 
