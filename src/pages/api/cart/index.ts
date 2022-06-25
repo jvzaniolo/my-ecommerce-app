@@ -4,15 +4,14 @@ import { supabase } from '~/services/supabase'
 const handler: NextApiHandler = async (req, res) => {
   const { token, user } = await supabase.auth.api.getUserByCookie(req)
 
-  token && supabase.auth.setAuth(token)
+  if (token) supabase.auth.setAuth(token)
 
   if (req.method === 'GET') {
     const { data, status, error } = await supabase
       .from('cart')
       .select('*, items:cart_item(*, product(*))')
-      .single()
 
-    return res.status(status).json(error || data)
+    return res.status(status).json(error || data.length ? data?.[0] : null)
   }
 
   if (req.method === 'POST') {
