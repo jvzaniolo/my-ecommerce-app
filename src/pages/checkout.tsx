@@ -5,7 +5,7 @@ import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import useSWR, { SWRConfiguration } from 'swr'
+import useSWR from 'swr'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
@@ -14,12 +14,10 @@ import { Cart } from '~/types'
 import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
-const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
-  fallback,
-}) => {
+const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
   const router = useRouter()
   const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher, {
-    fallback,
+    fallbackData: initialCart,
   })
   const {
     control,
@@ -123,14 +121,20 @@ const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await axios.get('/api/cart')
+  try {
+    const { data: cart } = await axios.get('/api/cart')
 
-  return {
-    props: {
-      fallback: {
-        '/api/cart': data,
+    return {
+      props: {
+        initialCart: cart || {},
       },
-    },
+    }
+  } catch (error) {
+    return {
+      props: {
+        initialCart: {},
+      },
+    }
   }
 }
 

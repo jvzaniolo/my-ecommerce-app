@@ -19,21 +19,19 @@ import Head from 'next/head'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
-import useSWR, { SWRConfiguration } from 'swr'
+import useSWR from 'swr'
 import { axios, fetcher } from '~/services/axios'
 import { Order } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
-const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
-  fallback,
-}) => {
+const Order: NextPage<{ initialOrder: Order }> = ({ initialOrder }) => {
   const router = useRouter()
   const { id } = router.query
   const { data: order, error } = useSWR<Order, AxiosError>(
     `/api/orders/${id}`,
     fetcher,
     {
-      fallback,
+      fallbackData: initialOrder,
     }
   )
 
@@ -126,9 +124,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
   return {
     props: {
-      fallback: {
-        [`/api/orders/${id}`]: order,
-      },
+      initialOrder: order,
     },
   }
 }

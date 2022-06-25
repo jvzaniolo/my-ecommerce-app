@@ -13,7 +13,7 @@ import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import useSWR, { SWRConfiguration } from 'swr'
+import useSWR from 'swr'
 import { OrderSummary } from '~/components/order-summary'
 import { Quantity } from '~/components/quantity'
 import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
@@ -26,11 +26,9 @@ import { toUSCurrency } from '~/utils/format'
  * @see Using CartDrawer for now
  * @see src/components/cart-drawer.tsx
  */
-const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
-  fallback,
-}) => {
+const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
   const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher, {
-    fallback,
+    fallbackData: initialCart,
   })
 
   if (cart) {
@@ -123,13 +121,11 @@ const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await axios.get('/api/cart')
+  const { data: cart } = await axios.get('/api/cart')
 
   return {
     props: {
-      fallback: {
-        '/api/cart': data,
-      },
+      initialCart: cart,
     },
   }
 }
