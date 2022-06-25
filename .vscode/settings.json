@@ -1,0 +1,7 @@
+{
+  "cSpell.words": ["hookform", "testid"],
+  "editor.foldingImportsByDefault": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}
