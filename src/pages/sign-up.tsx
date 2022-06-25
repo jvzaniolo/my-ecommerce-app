@@ -1,6 +1,14 @@
-import { Button, Center, Container, Flex, Heading } from '@chakra-ui/react'
+import {
+  Button,
+  Center,
+  Container,
+  Flex,
+  Heading,
+  useToast,
+} from '@chakra-ui/react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { NextPage } from 'next'
+import Head from 'next/head'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { Input } from '~/components/input'
@@ -26,59 +34,77 @@ const SignUp: NextPage = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
   })
+  const toast = useToast()
   const { signUp } = useUser()
 
   const onSignUp: SubmitHandler<SignUpFormData> = async data => {
-    const { email, password } = data
+    try {
+      const { email, password } = data
 
-    await signUp(email, password)
+      await signUp(email, password)
+      reset()
+    } catch (error: any) {
+      toast({
+        title: 'Sign In',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+      })
+    }
   }
 
   return (
-    <Center>
-      <Container maxW="container.sm">
-        <Heading mb="6">Sign Up</Heading>
+    <>
+      <Head>
+        <title>My E-Com | Sign Up</title>
+      </Head>
 
-        <Flex
-          direction="column"
-          gap="3"
-          as="form"
-          onSubmit={handleSubmit(onSignUp)}
-        >
-          <Input
-            label="E-mail"
-            type="email"
-            {...register('email')}
-            error={errors.email?.message}
-          />
-          <Input
-            label="Password"
-            type="password"
-            {...register('password')}
-            error={errors.password?.message}
-          />
-          <Input
-            label="Confirm Password"
-            type="password"
-            {...register('confirmPassword')}
-            error={errors.confirmPassword?.message}
-          />
+      <Center>
+        <Container maxW="container.sm">
+          <Heading mb="6">Sign Up</Heading>
 
-          <Button
-            mt="6"
-            w="full"
-            type="submit"
-            colorScheme="purple"
-            isLoading={isSubmitting}
+          <Flex
+            direction="column"
+            gap="3"
+            as="form"
+            onSubmit={handleSubmit(onSignUp)}
           >
-            Sign Up
-          </Button>
-        </Flex>
-      </Container>
-    </Center>
+            <Input
+              label="E-mail"
+              type="email"
+              {...register('email')}
+              error={errors.email?.message}
+            />
+            <Input
+              label="Password"
+              type="password"
+              {...register('password')}
+              error={errors.password?.message}
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              {...register('confirmPassword')}
+              error={errors.confirmPassword?.message}
+            />
+
+            <Button
+              mt="6"
+              w="full"
+              type="submit"
+              colorScheme="purple"
+              isLoading={isSubmitting}
+            >
+              Sign Up
+            </Button>
+          </Flex>
+        </Container>
+      </Center>
+    </>
   )
 }
 
