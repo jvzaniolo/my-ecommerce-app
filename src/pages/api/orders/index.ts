@@ -6,14 +6,6 @@ const handler: NextApiHandler = async (req, res) => {
 
   supabase.auth.setAuth(access_token)
 
-  if (req.method === 'GET') {
-    const { data, status, error } = await supabase
-      .from('order')
-      .select('*, items:order_item(*, product(*))')
-
-    return res.status(status).json(error || data)
-  }
-
   if (req.method === 'POST') {
     const { cartItems } = req.body as {
       cartItems: { product_id: string; quantity: number }[]
@@ -55,7 +47,7 @@ const handler: NextApiHandler = async (req, res) => {
     return res.status(status).json(error || data)
   }
 
-  res.setHeader('Allow', ['GET', 'POST'])
+  res.setHeader('Allow', ['POST'])
   return res.status(405).json('Method Not Allowed')
 }
 
