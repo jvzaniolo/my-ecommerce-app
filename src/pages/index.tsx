@@ -14,12 +14,17 @@ import NextImage from 'next/image'
 import NextLink from 'next/link'
 import useSWR, { SWRConfiguration } from 'swr'
 import { axios, fetcher } from '~/services/axios'
+import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
 const Home: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
-  const { data: items } = useSWR('/api/products', fetcher, { fallback })
+  const { data: items } = useSWR<Product[]>('/api/products', fetcher, {
+    fallback,
+  })
+
+  if (!items) return <>Loading...</>
 
   return items.length > 0 ? (
     <SimpleGrid

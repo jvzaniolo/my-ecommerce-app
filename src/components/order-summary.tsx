@@ -2,6 +2,7 @@ import { Box, Divider, Flex, Heading, Stack, Text } from '@chakra-ui/react'
 import { FC, ReactNode } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '~/services/axios'
+import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
 type OrderSummary = {
@@ -9,7 +10,9 @@ type OrderSummary = {
 }
 
 export const OrderSummary: FC<OrderSummary> = ({ children }) => {
-  const { data: cart } = useSWR('/api/cart', fetcher)
+  const { data: cart } = useSWR<Cart>('/api/cart', fetcher)
+
+  if (!cart) return <>Loading...</>
 
   const cartTotal = cart.items.reduce((acc: any, item: any) => {
     return acc + item.product.price * item.quantity

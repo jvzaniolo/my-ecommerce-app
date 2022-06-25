@@ -19,6 +19,7 @@ import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
 import useSWR, { SWRConfiguration } from 'swr'
 import { axios, fetcher } from '~/services/axios'
+import { Order } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
 const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
@@ -26,7 +27,9 @@ const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
 }) => {
   const router = useRouter()
   const { id } = router.query
-  const { data: order } = useSWR(`/api/order/${id}`, fetcher, { fallback })
+  const { data: order } = useSWR<Order>(`/api/order/${id}`, fetcher, {
+    fallback,
+  })
 
   if (!order) return <>Loading...</>
 
@@ -49,7 +52,7 @@ const Order: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
           <Heading size="sm" mb="3">
             Contact
           </Heading>
-          <Text>Email: {order.email}</Text>
+          <Text>Email: {order.user.email}</Text>
         </Box>
 
         <Box>

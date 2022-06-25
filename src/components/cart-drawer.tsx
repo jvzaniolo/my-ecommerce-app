@@ -20,7 +20,8 @@ import { FC } from 'react'
 import useSWR from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
-import { axios } from '~/services/axios'
+import { fetcher } from '~/services/axios'
+import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 import { Quantity } from './quantity'
 
@@ -30,22 +31,14 @@ type CartDrawerProps = {
 }
 
 export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
-  const { data: cart } = useSWR('/api/cart', url =>
-    axios.get(url).then(res => res.data)
-  )
+  const { data: cart } = useSWR<Cart>('/api/cart', fetcher)
   const { onCloseCartDrawer } = useCartDrawer()
+
+  if (!cart) return <>Loading...</>
 
   const cartTotal = cart.items.reduce((acc: any, item: any) => {
     return acc + item.product.price * item.quantity
   }, 0)
-
-  async function onUpdateItemQuantity(id: string, quantity: number) {
-    optimisticUpdateItemQuantity(cart, id, quantity)
-  }
-
-  async function onRemoveCartItem(id: string) {
-    optimisticDeleteItem(cart, id)
-  }
 
   return (
     <Drawer
@@ -84,15 +77,19 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                       </Text>
                       <Button
                         variant="link"
-                        onClick={() => onRemoveCartItem(item.id)}
+                        onClick={() => {
+                          optimisticDeleteItem(cart, item.id)
+                        }}
                       >
                         Remove
                       </Button>
                     </Flex>
                     <Quantity
-                      value={item.quantity}
-                      onChange={value => onUpdateItemQuantity(item.id, value)}
                       max={item.product.stock}
+                      value={item.quantity}
+                      onChange={value => {
+                        optimisticUpdateItemQuantity(cart, item.id, value)
+                      }}
                     />
                   </Flex>
                 </Flex>

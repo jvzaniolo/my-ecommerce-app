@@ -11,10 +11,12 @@ import {
 import { GetServerSideProps, NextPage } from 'next'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import useSWR, { mutate, SWRConfiguration } from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { OrderSummary } from '~/components/order-summary'
 import { Quantity } from '~/components/quantity'
+import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
 import { axios, fetcher } from '~/services/axios'
+import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
 /**
@@ -25,16 +27,16 @@ import { toUSCurrency } from '~/utils/format'
 const Cart: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
-  const { data: cart } = useSWR('/api/cart', fetcher, { fallback })
+  const { data: cart } = useSWR<Cart>('/api/cart', fetcher, { fallback })
+
+  if (!cart) return <>Loading...</>
 
   async function onUpdateItemQuantity(id: string, quantity: number) {
-    await axios.patch(`/api/cart/${id}`, { quantity })
-    mutate(`/api/cart`)
+    optimisticUpdateItemQuantity(cart, id, quantity)
   }
 
   async function onRemoveCartItem(id: string) {
-    await axios.delete(`/api/cart/${id}`)
-    mutate('/api/cart')
+    optimisticDeleteItem(cart, id)
   }
 
   return (

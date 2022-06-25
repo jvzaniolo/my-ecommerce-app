@@ -8,6 +8,7 @@ import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
 import { axios, fetcher } from '~/services/axios'
+import { Cart } from '~/types'
 import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
@@ -15,7 +16,7 @@ const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   fallback,
 }) => {
   const router = useRouter()
-  const { data: cart } = useSWR('/api/cart', fetcher, { fallback })
+  const { data: cart } = useSWR<Cart>('/api/cart', fetcher, { fallback })
   const {
     control,
     handleSubmit,
@@ -26,9 +27,12 @@ const Checkout: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
     resolver: yupResolver(checkoutFormSchema, { abortEarly: false }),
   })
 
+  if (!cart) return <>Loading...</>
+
   const onPurchase: SubmitHandler<FormData> = async data => {
     const { data: order } = await axios.post('/api/orders', {
-      cartId: cart.id,
+      cart,
+      ...data,
     })
 
     router.push(`/orders/${order.id}`)
@@ -114,15 +118,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
       },
     },
   }
-
-  /** @deprecated */
-  // return {
-  //   props: {},
-  //   redirect: {
-  //     destination: '/?error=cart-is-empty',
-  //     permanent: false,
-  //   },
-  // }
 }
 
 export default Checkout

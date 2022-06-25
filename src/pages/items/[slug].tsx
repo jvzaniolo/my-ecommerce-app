@@ -25,6 +25,7 @@ import useSWR, { SWRConfiguration, useSWRConfig } from 'swr'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { axios, fetcher } from '~/services/axios'
+import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 
 const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
@@ -35,15 +36,25 @@ const Item: NextPage<{ fallback: SWRConfiguration['fallback'] }> = ({
   const { query } = useRouter()
   const { mutate } = useSWRConfig()
   const { onOpenCartDrawer } = useCartDrawer()
-  const { data: item } = useSWR(`/api/products/${query.slug}`, fetcher, {
-    fallback,
-  })
+  const { data: item } = useSWR<Product>(
+    `/api/products/${query.slug}`,
+    fetcher,
+    {
+      fallback,
+    }
+  )
   const {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm()
 
+  if (!item) {
+    return <>Loading...</>
+  }
+
   async function onAddToCart() {
+    if (!item) return
+
     try {
       await axios.post(`/api/cart`, {
         productId: item.id,
