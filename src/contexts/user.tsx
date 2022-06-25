@@ -1,6 +1,5 @@
 import { useToast } from '@chakra-ui/react'
-import { ApiError, Session, User } from '@supabase/supabase-js'
-import { useRouter } from 'next/router'
+import { Session, User } from '@supabase/supabase-js'
 import {
   createContext,
   ReactNode,
@@ -8,30 +7,22 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { mutate } from 'swr'
 import { axios } from '~/services/axios'
 import { supabase } from '~/services/supabase'
 
 type UserContextValue = {
   user: User | null
   session: Session | null
-  signIn: (
-    email: string,
-    password: string,
-    onError?: (error: ApiError | null) => void
-  ) => Promise<void>
-  signOut: (onError?: (error: ApiError | null) => void) => Promise<void>
-  signUp: (
-    email: string,
-    password: string,
-    onError?: (error: ApiError | null) => void
-  ) => Promise<void>
+  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string) => Promise<void>
+  signOut: () => Promise<void>
 }
 
 const UserContext = createContext<UserContextValue | null>(null)
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const toast = useToast()
-  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
 
@@ -42,13 +33,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(session?.user ?? null)
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
 
         if (session) {
-          axios.post('/api/auth', { event, session })
+          await axios.post('/api/auth', { event, session })
+        } else {
+          await axios.delete('/api/auth')
         }
+
+        mutate('/api/cart')
       }
     )
 
@@ -57,61 +52,48 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  async function signIn(
-    email: string,
-    password: string,
-    onError?: (error: ApiError | null) => void
-  ) {
+  async function signIn(email: string, password: string) {
     const { session, user, error } = await supabase.auth.signIn({
       email,
       password,
     })
 
-    if (error) {
-      onError?.(error)
-    } else {
-      setSession(session)
-      setUser(user)
-      router.push('/')
-    }
+    if (error) return Promise.reject(error)
+
+    setUser(user)
+    setSession(session)
+
+    return Promise.resolve()
   }
 
-  async function signOut(onError?: (error: ApiError | null) => void) {
+  async function signOut() {
     const { error } = await supabase.auth.signOut()
 
-    if (error) {
-      onError?.(error)
-    } else {
-      setSession(null)
-      setUser(null)
-    }
+    if (error) return Promise.reject(error)
+
+    setUser(null)
+    setSession(null)
   }
 
-  async function signUp(
-    email: string,
-    password: string,
-    onError?: (error: ApiError | null) => void
-  ) {
+  async function signUp(email: string, password: string) {
     const { session, user, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    if (error) {
-      onError?.(error)
-    } else {
-      if (!session) {
-        toast({
-          title: 'Sign Up',
-          description: 'Please confirm your e-mail before signing in.',
-          status: 'success',
-          duration: 5000,
-        })
-      }
+    if (error) return Promise.reject(error)
 
-      setUser(user)
-      setSession(session)
+    if (!session) {
+      toast({
+        title: 'Sign Up',
+        description: 'Please confirm your e-mail before signing in.',
+        status: 'success',
+        duration: 5000,
+      })
     }
+
+    setUser(user)
+    setSession(session)
   }
 
   return (
