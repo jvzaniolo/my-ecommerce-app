@@ -9,17 +9,20 @@ const getOrderSchema = yup.object({
 const handler: NextApiHandler = async (req, res) => {
   const { token } = await supabase.auth.api.getUserByCookie(req)
 
-  token && supabase.auth.setAuth(token)
+  if (token) supabase.auth.setAuth(token)
 
   if (req.method === 'GET') {
     try {
+      console.log(req.query)
       const { id } = await getOrderSchema.validate(req.query)
 
       const { data, error, status } = await supabase
         .from('order')
-        .select('*, user(*), order_item(*, product(*))')
+        .select('*, user(*), items:order_item(*, product(*))')
         .match({ id })
         .single()
+
+      console.log(error)
 
       return res.status(status).json(error || data)
     } catch (error: any) {

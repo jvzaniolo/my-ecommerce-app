@@ -7,18 +7,16 @@ const handler: NextApiHandler = async (req, res) => {
   supabase.auth.setAuth(access_token)
 
   if (req.method === 'POST') {
-    const { cartItems } = req.body as {
-      cartItems: { product_id: string; quantity: number }[]
-    }
+    const { cart } = req.body
 
-    if (!cartItems) return res.status(400).json('Missing cart items.')
+    if (!cart.items) return res.status(400).json('Missing cart items.')
 
     const { user } = await supabase.auth.api.getUserByCookie(req)
 
     if (!user) return res.status(401).json('Unauthorized')
 
     const {
-      data: orderId,
+      data: order,
       status: orderStatus,
       error: orderError,
     } = await supabase
@@ -36,15 +34,16 @@ const handler: NextApiHandler = async (req, res) => {
     const { data, error, status } = await supabase
       .from('order_item')
       .insert(
-        cartItems.map(item => ({
-          order_id: orderId,
+        cart.items.map((item: any) => ({
+          order_id: order.id,
           product_id: item.product_id,
           quantity: item.quantity,
+          user_id: user.id,
         }))
       )
       .select('*, product(*)')
 
-    return res.status(status).json(error || data)
+    return res.status(status).json(error || { ...order, items: data })
   }
 
   res.setHeader('Allow', ['POST'])
