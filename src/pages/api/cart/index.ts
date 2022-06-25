@@ -2,9 +2,9 @@ import { NextApiHandler } from 'next'
 import { supabase } from '~/services/supabase'
 
 const handler: NextApiHandler = async (req, res) => {
-  const access_token = req.cookies['sb-access-token']
+  const { token, user } = await supabase.auth.api.getUserByCookie(req)
 
-  supabase.auth.setAuth(access_token)
+  token && supabase.auth.setAuth(token)
 
   if (req.method === 'GET') {
     const { data, status, error } = await supabase
@@ -20,8 +20,6 @@ const handler: NextApiHandler = async (req, res) => {
 
     if (!quantity) return res.status(400).json('Missing quantity.')
     if (!productId) return res.status(400).json('Missing product id.')
-
-    const { user } = await supabase.auth.api.getUserByCookie(req)
 
     // TODO: allow anonymous user to add items to cart
     if (!user) return res.status(401).json('Unauthorized')
