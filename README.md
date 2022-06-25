@@ -27,11 +27,11 @@ This project uses the following resources
 - [React Hook Forms](https://react-hook-form.com/) - to handle huge forms
 - [React Testing Library](https://testing-library.com/) - for testing
 
-## Fixes
+## To Fix 
 
-- [ ] Corrigir Sign Up
-- [ ] Deletar itens do carrinho quando comprar
-- [ ] Mostrar campos de address do Billing
+- [ ] Fix Sign Up
+- [ ] Delete cart items when order is completed
+- [ ] Show billing address if it's not the same as shipping address
 
 ## Author
 
