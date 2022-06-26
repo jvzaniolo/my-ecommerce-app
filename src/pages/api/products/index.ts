@@ -15,8 +15,6 @@ const handler: NextApiHandler = async (req, res) => {
         }
       })
 
-      console.log(productsWithImage)
-
       return res.status(status).json(error || productsWithImage)
     }
 

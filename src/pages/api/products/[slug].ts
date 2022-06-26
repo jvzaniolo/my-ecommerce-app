@@ -13,7 +13,16 @@ const handler: NextApiHandler = async (req, res) => {
       .match({ slug })
       .single()
 
-    return res.status(status).json(error || data)
+    if (data) {
+      const productWithImage = {
+        ...data,
+        image: supabase.storage.from('product-image').getPublicUrl(data.slug),
+      }
+
+      return res.status(status).json(error || productWithImage)
+    }
+
+    return res.status(status).json(error)
   }
 
   res.setHeader('Allow', ['GET'])
