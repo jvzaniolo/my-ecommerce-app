@@ -6,4 +6,8 @@ export const axios = _axios.create({
   baseURL: process.env.BASE_URL || 'http://localhost:3000',
 })
 
-export const fetcher: Fetcher = url => axios.get(url).then(res => res.data)
+export const fetcher: Fetcher = url =>
+  axios.get(url).then(res => {
+    console.log(url)
+    return res.data
+  })
