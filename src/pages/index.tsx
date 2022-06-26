@@ -43,7 +43,7 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
               lg: 'repeat(auto-fit, minmax(300px, 0fr))',
             }}
           >
-            {items.map((item: any) => (
+            {items.map(item => (
               <LinkBox
                 key={item.id}
                 shadow="md"
@@ -53,7 +53,7 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
                 <AspectRatio ratio={4 / 3}>
                   <Img
                     as={NextImage}
-                    src={item.image}
+                    src={item.image.publicURL}
                     alt={item.name}
                     layout="fill"
                     objectFit="cover"

@@ -89,7 +89,7 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
                 <Img
                   as={Image}
                   layout="fill"
-                  src={item.image}
+                  src={item.image.publicURL}
                   alt={item.name}
                   objectFit="cover"
                 />

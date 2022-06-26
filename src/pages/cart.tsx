@@ -46,7 +46,7 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
           <Flex direction={['column', 'column', 'row']} gap="10" mt="4">
             <Stack as="ul" flex="2" spacing="4">
               {cart.items.length > 0 ? (
-                cart.items.map((item: any) => (
+                cart.items.map(item => (
                   <Flex
                     key={item.id}
                     as="li"
@@ -58,7 +58,7 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
                       <Img
                         as={Image}
                         layout="fill"
-                        src={item.product.image}
+                        src={item.product.image.publicURL}
                         alt={item.product.name}
                         borderLeftRadius="md"
                       />

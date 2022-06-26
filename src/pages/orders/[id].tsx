@@ -73,7 +73,7 @@ const Order: NextPage<{ initialOrder: Order }> = ({ initialOrder }) => {
                 Items
               </Heading>
 
-              {order.items.map((item: any) => (
+              {order.items.map(item => (
                 <Flex key={item.id}>
                   <Flex w="full" justify="space-between">
                     <Text>

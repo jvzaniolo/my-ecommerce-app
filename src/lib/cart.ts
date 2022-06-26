@@ -1,12 +1,13 @@
 import { mutate } from 'swr'
 import { axios } from '~/services/axios'
+import { Cart } from '~/types'
 
 export async function optimisticUpdateItemQuantity(
-  cart: any,
+  cart: Cart,
   cartItemId: string,
   quantity: number
 ) {
-  const updatedCartItems = cart.items.map((item: any) =>
+  const updatedCartItems = cart.items.map(item =>
     item.id === cartItemId ? { ...item, quantity } : item
   )
 
@@ -19,9 +20,7 @@ export async function optimisticUpdateItemQuantity(
 
       return {
         ...cart,
-        items: cart.items.map((item: any) =>
-          item.id === data.id ? data : item
-        ),
+        items: cart.items.map(item => (item.id === data.id ? data : item)),
       }
     },
     {
@@ -31,7 +30,7 @@ export async function optimisticUpdateItemQuantity(
   )
 }
 
-export async function optimisticDeleteItem(cart: any, cartItemId: string) {
+export async function optimisticDeleteItem(cart: Cart, cartItemId: string) {
   mutate(
     '/api/cart',
     async () => {
@@ -39,13 +38,13 @@ export async function optimisticDeleteItem(cart: any, cartItemId: string) {
 
       return {
         ...cart,
-        items: cart.items.filter((item: any) => item.id !== data.id),
+        items: cart.items.filter(item => item.id !== data.id),
       }
     },
     {
       optimisticData: {
         ...cart,
-        items: cart.items.filter((item: any) => item.id !== cartItemId),
+        items: cart.items.filter(item => item.id !== cartItemId),
       },
       rollbackOnError: true,
     }

@@ -38,7 +38,7 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const router = useRouter()
 
   const cartTotal = cart
-    ? cart.items.reduce((acc: any, item: any) => {
+    ? cart.items.reduce((acc, item) => {
         return acc + item.product.price * item.quantity
       }, 0)
     : 0
@@ -55,12 +55,12 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         <DrawerBody>
           <Stack spacing="8">
             {cart && cart.items.length > 0 ? (
-              cart.items.map((item: any) => (
+              cart.items.map(item => (
                 <Flex key={item.id} gap="3">
                   <AspectRatio ratio={1} flex="1">
                     <Img
                       as={Image}
-                      src={item.product.image}
+                      src={item.product.image.publicURL}
                       alt={item.product.name}
                       layout="fill"
                       objectFit="cover"

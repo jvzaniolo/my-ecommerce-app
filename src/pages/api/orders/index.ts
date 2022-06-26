@@ -1,5 +1,6 @@
 import { NextApiHandler } from 'next'
 import { supabase } from '~/services/supabase'
+import { Cart } from '~/types'
 
 const handler: NextApiHandler = async (req, res) => {
   const access_token = req.cookies['sb-access-token']
@@ -7,7 +8,7 @@ const handler: NextApiHandler = async (req, res) => {
   supabase.auth.setAuth(access_token)
 
   if (req.method === 'POST') {
-    const { cart } = req.body
+    const cart = req.body.cart as Cart
 
     if (!cart.items) return res.status(400).json('Missing cart items.')
 
@@ -34,7 +35,7 @@ const handler: NextApiHandler = async (req, res) => {
     const { data, error, status } = await supabase
       .from('order_item')
       .insert(
-        cart.items.map((item: any) => ({
+        cart.items.map(item => ({
           order_id: order.id,
           product_id: item.product_id,
           quantity: item.quantity,

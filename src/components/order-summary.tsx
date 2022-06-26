@@ -14,14 +14,14 @@ export const OrderSummary: FC<OrderSummary> = ({ children }) => {
   const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher)
 
   if (cart) {
-    const cartTotal = cart.items.reduce((acc: any, item: any) => {
+    const cartTotal = cart.items.reduce((acc, item) => {
       return acc + item.product.price * item.quantity
     }, 0)
 
     return (
       <Stack spacing="4" p="4" shadow="md" borderRadius="md">
         <Heading size="lg">Order Summary</Heading>
-        {cart.items.map((item: any) => (
+        {cart.items.map(item => (
           <Box key={item.id}>
             <Text noOfLines={1}>{item.product.name}</Text>
             <Flex justify="space-between">
