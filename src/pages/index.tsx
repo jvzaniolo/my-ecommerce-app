@@ -20,13 +20,11 @@ import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
 const Home: NextPage<{ products: Product[] }> = ({ products }) => {
-  const { data: productQuery, error } = trpc.useQuery(['product.all'], {
+  const { data: items, error } = trpc.useQuery(['product.all'], {
     initialData: products,
   })
 
-  if (productQuery && productQuery.data) {
-    const items = productQuery.data
-
+  if (items) {
     return (
       <>
         <Head>

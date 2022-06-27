@@ -13,7 +13,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
+import { createSSGHelpers } from '@trpc/react/ssg'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -21,25 +21,24 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
-import useSWR, { mutate } from 'swr'
+import { mutate } from 'swr'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { axios, fetcher } from '~/services/axios'
+import { appRouter } from '~/server/routers/_app'
+import { supabase } from '~/server/supabase'
 import { Product } from '~/types'
+import { axios } from '~/utils/axios'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
 const Item: NextPage<{ product: Product }> = ({ product }) => {
   const [quantity, setQuantity] = useState(1)
   const toast = useToast()
-  const { query } = useRouter()
+  const slug = useRouter().query.slug as string
   const { onOpenCartDrawer } = useCartDrawer()
-  const { data: item, error } = useSWR<Product, AxiosError>(
-    `/api/products/${query.slug}`,
-    fetcher,
-    {
-      fallbackData: product,
-    }
-  )
+  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }], {
+    initialData: product,
+  })
 
   async function onAddToCart() {
     if (!item) return
@@ -134,7 +133,9 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await axios.get<Product[]>('/api/products')
+  const { data } = await supabase.from('product').select('slug')
+
+  if (!data) throw new Error('No products found')
 
   return {
     paths: data.map(product => ({
@@ -146,13 +147,21 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string
-  const { data: product } = await axios.get(`/api/products/${slug}`)
+export const getStaticProps: GetStaticProps = async context => {
+  const ssg = createSSGHelpers({
+    router: appRouter,
+    ctx: {},
+  })
+  const slug = context.params?.slug as string
+
+  await ssg.fetchQuery('product.bySlug', {
+    slug,
+  })
 
   return {
     props: {
-      product,
+      trpcState: ssg.dehydrate(),
+      slug,
     },
   }
 }
