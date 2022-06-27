@@ -5,20 +5,7 @@ const handler: NextApiHandler = async (req, res) => {
   if (req.method === 'GET') {
     const { data, error, status } = await supabase.from('product').select('*')
 
-    if (data) {
-      const productsWithImage = data.map(product => {
-        return {
-          ...product,
-          image: supabase.storage
-            .from('product-image')
-            .getPublicUrl(product.slug),
-        }
-      })
-
-      return res.status(status).json(error || productsWithImage)
-    }
-
-    return res.status(status).json(error)
+    return res.status(status).json(error || data)
   }
 
   res.setHeader('Allow', ['GET'])

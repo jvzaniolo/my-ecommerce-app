@@ -4,7 +4,7 @@ export type Product = {
   price: number
   stock: number
   slug: string
-  image: { publicURL: string }
+  image_url: string
   description: string
 }
 

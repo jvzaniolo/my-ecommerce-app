@@ -58,7 +58,7 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
                       <Img
                         as={Image}
                         layout="fill"
-                        src={item.product.image.publicURL}
+                        src={item.product.image_url}
                         alt={item.product.name}
                         borderLeftRadius="md"
                       />
