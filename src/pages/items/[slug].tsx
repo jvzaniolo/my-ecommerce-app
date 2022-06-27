@@ -14,7 +14,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { AxiosError } from 'axios'
-import { GetServerSideProps, NextPage } from 'next'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -133,8 +133,21 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
   return <>Loading...</>
 }
 
-export const getServerSideProps: GetServerSideProps = async context => {
-  const slug = context.query.slug as string
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data } = await axios.get<Product[]>('/api/products')
+
+  return {
+    paths: data.map(product => ({
+      params: {
+        slug: product.slug,
+      },
+    })),
+    fallback: false,
+  }
+}
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params?.slug as string
   const { data: product } = await axios.get(`/api/products/${slug}`)
 
   return {
