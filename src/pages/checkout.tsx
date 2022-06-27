@@ -7,27 +7,51 @@ import {
   Stack,
   useToast,
 } from '@chakra-ui/react'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { AxiosError } from 'axios'
-import { GetServerSideProps, NextPage } from 'next'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import useSWR, { mutate } from 'swr'
+import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { axios, fetcher } from '~/services/axios'
-import { Cart } from '~/types'
 import { FormData } from '~/types/checkout-form'
-import { checkoutFormSchema } from '~/utils/checkout-form-schema'
+import { trpc } from '~/utils/trpc'
 
-const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
+const checkoutFormSchema = z
+  .object({
+    shipping: z.object({
+      email: z.string().min(1, 'Email is required'),
+      firstName: z.string().min(1, 'First name is required'),
+      lastName: z.string().min(1, 'Last name is required'),
+      address: z.string().min(1, 'Address is required'),
+      secondaryAddress: z.string().optional(),
+      city: z.string().min(1, 'City is required'),
+      state: z.string().min(1, 'State is required'),
+      zipCode: z.string().min(1, 'Zip code is required'),
+      country: z.string().min(1, 'Country is required'),
+      phone: z.string().min(1, 'Phone is required'),
+    }),
+    billing: z.object({
+      isSameAsShipping: z.boolean(),
+    }),
+    payment: z.object({
+      cardNumber: z.string().length(16, 'Card number is invalid'),
+      expiry: z
+        .string()
+        .regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, 'Expiry is invalid'),
+      cvv: z.string().length(3, 'CVV is invalid'),
+    }),
+  })
+  .catchall(z.string())
+
+const Checkout: NextPage = () => {
   const toast = useToast()
   const router = useRouter()
-  const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher, {
-    fallbackData: initialCart,
-  })
+  const utils = trpc.useContext()
+  const { data: cart, error } = trpc.useQuery(['cart.all'])
+  const createOrder = trpc.useMutation(['order.create'])
   const {
     control,
     handleSubmit,
@@ -35,31 +59,32 @@ const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
     formState: { errors },
   } = useForm<FormData>({
     mode: 'onBlur',
-    resolver: yupResolver(checkoutFormSchema, { abortEarly: false }),
+    resolver: zodResolver(checkoutFormSchema),
   })
 
-  const onPurchase: SubmitHandler<FormData> = async formData => {
-    try {
-      const { data: order } = await axios.post('/api/orders', {
-        cart,
-        ...formData,
-      })
-
-      mutate('/api/cart')
-
-      router.push(`/orders/${order.id}`)
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-  }
-
   if (cart) {
+    const onPurchase: SubmitHandler<FormData> = async formData => {
+      createOrder.mutate(
+        { cart },
+        {
+          onSuccess(data) {
+            utils.invalidateQueries('cart.all')
+
+            router.push(`/orders/${data.id}`)
+          },
+          onError(error) {
+            toast({
+              title: 'Error',
+              description: error.message || 'Something went wrong',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            })
+          },
+        }
+      )
+    }
+
     return (
       <>
         <Head>
@@ -106,17 +131,20 @@ const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
                 <Stack mt="3" direction="column">
                   <Input
                     label="Card Number"
+                    placeholder="1234 1234 1234 1234"
                     {...register('payment.cardNumber')}
                     error={errors.payment?.cardNumber?.message}
                   />
                   <Stack direction="row">
                     <Input
                       label="Expiry"
+                      placeholder="MM/YY"
                       {...register('payment.expiry')}
                       error={errors.payment?.expiry?.message}
                     />
                     <Input
                       label="CVV"
+                      placeholder="123"
                       {...register('payment.cvv')}
                       error={errors.payment?.cvv?.message}
                     />
@@ -139,24 +167,6 @@ const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    const { data: cart } = await axios.get('/api/cart')
-
-    return {
-      props: {
-        initialCart: cart || {},
-      },
-    }
-  } catch (error) {
-    return {
-      props: {
-        initialCart: {},
-      },
-    }
-  }
 }
 
 export default Checkout

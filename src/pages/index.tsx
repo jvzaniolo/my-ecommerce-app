@@ -15,14 +15,11 @@ import Head from 'next/head'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import { appRouter } from '~/server/routers/_app'
-import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
-const Home: NextPage<{ products: Product[] }> = ({ products }) => {
-  const { data: items, error } = trpc.useQuery(['product.all'], {
-    initialData: products,
-  })
+const Home: NextPage = () => {
+  const { data: items, error } = trpc.useQuery(['product.all'])
 
   if (items) {
     return (
@@ -97,6 +94,8 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       trpcState: ssg.dehydrate(),
     },
+
+    revalidate: 60 * 60 * 24 * 7,
   }
 }
 

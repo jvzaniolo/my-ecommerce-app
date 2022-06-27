@@ -18,49 +18,48 @@ import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
-import { mutate } from 'swr'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { appRouter } from '~/server/routers/_app'
 import { supabase } from '~/server/supabase'
 import { Product } from '~/types'
-import { axios } from '~/utils/axios'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
-const Item: NextPage<{ product: Product }> = ({ product }) => {
-  const [quantity, setQuantity] = useState(1)
+const Item: NextPage<{ slug: string }> = ({ slug }) => {
   const toast = useToast()
-  const slug = useRouter().query.slug as string
   const { onOpenCartDrawer } = useCartDrawer()
-  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }], {
-    initialData: product,
-  })
+  const [quantity, setQuantity] = useState(1)
+  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }])
+  const utils = trpc.useContext()
+  const mutation = trpc.useMutation(['cart.add-item'])
 
   async function onAddToCart() {
     if (!item) return
 
-    try {
-      await axios.post(`/api/cart`, {
+    await mutation.mutateAsync(
+      {
         productId: item.id,
         quantity,
-      })
-
-      mutate('/api/cart')
-
-      onOpenCartDrawer()
-    } catch (error) {
-      toast({
-        title: 'Error while adding to cart',
-        description: `${item.name} was not added to your cart`,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-    }
+      },
+      {
+        async onSuccess() {
+          await utils.refetchQueries(['cart.all'])
+          onOpenCartDrawer()
+        },
+        onError() {
+          toast({
+            title: 'Error while adding to cart',
+            description: `${item.name} was not added to your cart`,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+        },
+      }
+    )
   }
 
   if (item) {
@@ -133,7 +132,9 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await supabase.from('product').select('slug')
+  const { data } = await supabase
+    .from<Pick<Product, 'slug'>>('product')
+    .select('slug')
 
   if (!data) throw new Error('No products found')
 
@@ -152,6 +153,7 @@ export const getStaticProps: GetStaticProps = async context => {
     router: appRouter,
     ctx: {},
   })
+
   const slug = context.params?.slug as string
 
   await ssg.fetchQuery('product.bySlug', {
@@ -163,6 +165,8 @@ export const getStaticProps: GetStaticProps = async context => {
       trpcState: ssg.dehydrate(),
       slug,
     },
+
+    revalidate: 60 * 60 * 24 * 7,
   }
 }
 

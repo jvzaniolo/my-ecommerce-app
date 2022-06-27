@@ -13,27 +13,19 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import Head from 'next/head'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
-import useSWR from 'swr'
-import { axios, fetcher } from '~/services/axios'
 import { Order } from '~/types'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
-const Order: NextPage<{ initialOrder: Order }> = ({ initialOrder }) => {
+const Order: NextPage = () => {
   const router = useRouter()
-  const { id } = router.query
-  const { data: order, error } = useSWR<Order, AxiosError>(
-    `/api/orders/${id}`,
-    fetcher,
-    {
-      fallbackData: initialOrder,
-    }
-  )
+  const id = router.query.id as string
+  const { data: order, error } = trpc.useQuery(['order.byId', { id }])
 
   if (order) {
     const orderTotal = order.items.reduce(
@@ -116,17 +108,6 @@ const Order: NextPage<{ initialOrder: Order }> = ({ initialOrder }) => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getServerSideProps: GetServerSideProps = async context => {
-  const { id } = context.query
-  const { data: order } = await axios.get(`/api/orders/${id}`)
-
-  return {
-    props: {
-      initialOrder: order,
-    },
-  }
 }
 
 export default Order

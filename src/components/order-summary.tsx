@@ -1,17 +1,14 @@
 import { Box, Divider, Flex, Heading, Stack, Text } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
 import { FC, ReactNode } from 'react'
-import useSWR from 'swr'
-import { fetcher } from '~/services/axios'
-import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
 type OrderSummary = {
   children: ReactNode
 }
 
 export const OrderSummary: FC<OrderSummary> = ({ children }) => {
-  const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher)
+  const { data: cart, error } = trpc.useQuery(['cart.all'])
 
   if (cart) {
     const cartTotal = cart.items.reduce((acc, item) => {

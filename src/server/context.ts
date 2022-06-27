@@ -5,7 +5,11 @@ import { supabase } from './supabase'
 export async function createContextInner(
   _opts: trpcNext.CreateNextContextOptions
 ) {
-  return await supabase.auth.api.getUserByCookie(_opts.req)
+  const auth = await supabase.auth.api.getUserByCookie(_opts.req)
+
+  if (auth.token) supabase.auth.setAuth(auth.token)
+
+  return auth
 }
 
 export type Context = trpc.inferAsyncReturnType<typeof createContextInner>

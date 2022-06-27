@@ -7,9 +7,9 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { mutate } from 'swr'
 import { supabase } from '~/server/supabase'
 import { axios } from '~/utils/axios'
+import { trpc } from '~/utils/trpc'
 
 type UserContextValue = {
   user: User | null
@@ -23,6 +23,7 @@ const UserContext = createContext<UserContextValue | null>(null)
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const toast = useToast()
+  const utils = trpc.useContext()
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
 
@@ -43,7 +44,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           await axios.delete('/api/auth')
         }
 
-        mutate('/api/cart')
+        utils.invalidateQueries('cart.all')
       }
     )
 
