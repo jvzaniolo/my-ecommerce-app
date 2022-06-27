@@ -1,11 +1,19 @@
-import { Box, Button, Checkbox, Flex, Heading, Stack } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Heading,
+  Stack,
+  useToast,
+} from '@chakra-ui/react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { AxiosError } from 'axios'
 import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
@@ -15,6 +23,7 @@ import { FormData } from '~/types/checkout-form'
 import { checkoutFormSchema } from '~/utils/checkout-form-schema'
 
 const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
+  const toast = useToast()
   const router = useRouter()
   const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher, {
     fallbackData: initialCart,
@@ -30,12 +39,24 @@ const Checkout: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
   })
 
   const onPurchase: SubmitHandler<FormData> = async formData => {
-    const { data: order } = await axios.post('/api/orders', {
-      cart,
-      ...formData,
-    })
+    try {
+      const { data: order } = await axios.post('/api/orders', {
+        cart,
+        ...formData,
+      })
 
-    router.push(`/orders/${order.id}`)
+      mutate('/api/cart')
+
+      router.push(`/orders/${order.id}`)
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Something went wrong',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
   }
 
   if (cart) {
