@@ -18,6 +18,7 @@ import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import { Quantity } from '~/components/quantity'
@@ -28,7 +29,8 @@ import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
-const Item: NextPage<{ slug: string }> = ({ slug }) => {
+const Item: NextPage = () => {
+  const slug = useRouter().query.slug as string
   const toast = useToast()
   const { onOpenCartDrawer } = useCartDrawer()
   const [quantity, setQuantity] = useState(1)
@@ -36,10 +38,10 @@ const Item: NextPage<{ slug: string }> = ({ slug }) => {
   const utils = trpc.useContext()
   const mutation = trpc.useMutation(['cart.add-item'])
 
-  async function onAddToCart() {
+  function onAddToCart() {
     if (!item) return
 
-    await mutation.mutateAsync(
+    mutation.mutate(
       {
         productId: item.id,
         quantity,
@@ -90,6 +92,7 @@ const Item: NextPage<{ slug: string }> = ({ slug }) => {
                   src={item.image_url}
                   alt={item.name}
                   objectFit="cover"
+                  priority
                 />
               </AspectRatio>
             </Box>
@@ -113,6 +116,7 @@ const Item: NextPage<{ slug: string }> = ({ slug }) => {
                   w="full"
                   type="submit"
                   colorScheme="purple"
+                  isLoading={mutation.isLoading}
                   leftIcon={<MdOutlineAddShoppingCart />}
                   onClick={onAddToCart}
                 >
