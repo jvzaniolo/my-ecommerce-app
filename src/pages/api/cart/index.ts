@@ -1,5 +1,5 @@
 import { NextApiHandler } from 'next'
-import { supabase } from '~/services/supabase'
+import { supabase } from '~/server/supabase'
 
 const handler: NextApiHandler = async (req, res) => {
   const { token, user } = await supabase.auth.api.getUserByCookie(req)

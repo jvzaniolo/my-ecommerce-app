@@ -8,8 +8,8 @@ import {
   useState,
 } from 'react'
 import { mutate } from 'swr'
-import { axios } from '~/services/axios'
-import { supabase } from '~/services/supabase'
+import { supabase } from '~/server/supabase'
+import { axios } from '~/utils/axios'
 
 type UserContextValue = {
   user: User | null

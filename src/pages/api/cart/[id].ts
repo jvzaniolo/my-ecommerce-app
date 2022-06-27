@@ -1,6 +1,6 @@
 import { NextApiHandler } from 'next'
 import * as yup from 'yup'
-import { supabase } from '~/services/supabase'
+import { supabase } from '~/server/supabase'
 
 const cartSchema = yup.object({
   id: yup.string().required('Missing cart id.'),

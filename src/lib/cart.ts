@@ -1,6 +1,6 @@
 import { mutate } from 'swr'
-import { axios } from '~/services/axios'
 import { Cart } from '~/types'
+import { axios } from '~/utils/axios'
 
 export async function optimisticUpdateItemQuantity(
   cart: Cart,

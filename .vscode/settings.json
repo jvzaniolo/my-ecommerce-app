@@ -1,5 +1,5 @@
 {
-  "cSpell.words": ["hookform", "testid"],
+  "cSpell.words": ["hookform", "testid", "trpc"],
   "editor.foldingImportsByDefault": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
