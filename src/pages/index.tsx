@@ -10,7 +10,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { AxiosError } from 'axios'
-import { GetServerSideProps, NextPage } from 'next'
+import { GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
@@ -61,7 +61,7 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
                 </AspectRatio>
                 <Box p={3}>
                   <Heading as="h2" size="sm" fontWeight="medium">
-                    <NextLink href={`/items/${item.slug}`} passHref>
+                    <NextLink href={`/items/${item.slug}`} passHref prefetch>
                       <LinkOverlay>{item.name}</LinkOverlay>
                     </NextLink>
                   </Heading>
@@ -89,7 +89,7 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
   return <>Loading...</>
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const { data: products } = await axios.get('/api/products')
 
   return {
