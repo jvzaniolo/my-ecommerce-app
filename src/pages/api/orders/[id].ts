@@ -19,9 +19,8 @@ const handler: NextApiHandler = async (req, res) => {
         .from('order')
         .select('*, user(*), items:order_item(*, product(*))')
         .match({ id })
-        .single()
 
-      return res.status(status).json(error || data)
+      return res.status(status).json(error || data[0])
     } catch (error: any) {
       return res.status(400).json(error.message)
     }

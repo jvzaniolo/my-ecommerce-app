@@ -3,16 +3,14 @@ import { supabase } from '~/services/supabase'
 import { Cart } from '~/types'
 
 const handler: NextApiHandler = async (req, res) => {
-  const access_token = req.cookies['sb-access-token']
+  const { user, token } = await supabase.auth.api.getUserByCookie(req)
 
-  supabase.auth.setAuth(access_token)
+  if (token) supabase.auth.setAuth(token)
 
   if (req.method === 'POST') {
     const cart = req.body.cart as Cart
 
     if (!cart.items) return res.status(400).json('Missing cart items.')
-
-    const { user } = await supabase.auth.api.getUserByCookie(req)
 
     if (!user) return res.status(401).json('Unauthorized')
 
@@ -27,7 +25,7 @@ const handler: NextApiHandler = async (req, res) => {
           user_id: user.id,
         },
       ])
-      .select('id')
+      .select('*')
       .single()
 
     if (orderError) return res.status(orderStatus).json(orderError)
@@ -43,6 +41,29 @@ const handler: NextApiHandler = async (req, res) => {
         }))
       )
       .select('*, product(*)')
+
+    if (!error) {
+      cart.items.forEach(async item => {
+        const response = await Promise.all([
+          supabase
+            .from('product')
+            .update({
+              stock: item.product.stock - item.quantity,
+            })
+            .match({ product_id: item.product_id }),
+
+          supabase.from('cart_item').delete().match({ id: item.id }),
+        ])
+
+        if (response[0].error) {
+          return res.status(response[0].status).json(response[0].error)
+        }
+
+        if (response[1].error) {
+          return res.status(response[1].status).json(response[1].error)
+        }
+      })
+    }
 
     return res.status(status).json(error || { ...order, items: data })
   }
