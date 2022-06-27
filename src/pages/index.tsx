@@ -9,26 +9,24 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
+import { createSSGHelpers } from '@trpc/react/ssg'
 import { GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
-import useSWR from 'swr'
-import { axios, fetcher } from '~/services/axios'
+import { appRouter } from '~/server/routers/_app'
 import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
 const Home: NextPage<{ products: Product[] }> = ({ products }) => {
-  const { data: items, error } = useSWR<Product[], AxiosError>(
-    '/api/products',
-    fetcher,
-    {
-      fallbackData: products,
-    }
-  )
+  const { data: productQuery, error } = trpc.useQuery(['product.all'], {
+    initialData: products,
+  })
 
-  if (items) {
+  if (productQuery && productQuery.data) {
+    const items = productQuery.data
+
     return (
       <>
         <Head>
@@ -61,7 +59,7 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
                 </AspectRatio>
                 <Box p={3}>
                   <Heading as="h2" size="sm" fontWeight="medium">
-                    <NextLink href={`/items/${item.slug}`} passHref prefetch>
+                    <NextLink href={`/items/${item.slug}`} passHref>
                       <LinkOverlay>{item.name}</LinkOverlay>
                     </NextLink>
                   </Heading>
@@ -90,11 +88,16 @@ const Home: NextPage<{ products: Product[] }> = ({ products }) => {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const { data: products } = await axios.get('/api/products')
+  const ssg = createSSGHelpers({
+    router: appRouter,
+    ctx: {},
+  })
+
+  await ssg.fetchQuery('product.all')
 
   return {
     props: {
-      products,
+      trpcState: ssg.dehydrate(),
     },
   }
 }
