@@ -23,24 +23,18 @@ export const cartRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      // Get the user cart id
-      const cartRes = await supabase
-        .from<Pick<Cart, 'id'>>('cart')
-        .select('id')
-        .match({ user_id: user?.id })
-        .single()
-
       // Find existing item in cart
       const cartItemRes = await supabase
         .from<Pick<Cart['items'][0], 'id' | 'quantity'>>('cart_item')
         .select('id, quantity')
         .match({ product_id: input.productId })
+        .single()
 
       // If cart item exists, update the quantity with the new quantity
-      if (cartItemRes.data && cartItemRes.data.length > 0) {
+      if (cartItemRes.data) {
         const updatedItemRes = await supabase
           .from('cart_item')
-          .update({ quantity: cartItemRes.data[0].quantity + input.quantity })
+          .update({ quantity: cartItemRes.data.quantity + input.quantity })
           .select('*, product(*)')
           .match({ product_id: input.productId })
           .single()
@@ -54,7 +48,7 @@ export const cartRouter = createRouter()
         .insert([
           {
             quantity: input.quantity,
-            cart_id: cartRes.data?.id,
+            cart_id: user.cartId,
             user_id: user?.id,
             product_id: input.productId,
           },
@@ -65,7 +59,7 @@ export const cartRouter = createRouter()
       return newItemRes.data
     },
   })
-  .mutation('update-item-qty', {
+  .mutation('update-quantity', {
     input: z.object({
       itemId: z.string(),
       quantity: z.number().min(1),
@@ -81,7 +75,7 @@ export const cartRouter = createRouter()
       return data
     },
   })
-  .mutation('remove-item', {
+  .mutation('remove', {
     input: z.object({
       itemId: z.string(),
     }),

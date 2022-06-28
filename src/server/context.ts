@@ -1,16 +1,22 @@
 import * as trpc from '@trpc/server'
 import * as trpcNext from '@trpc/server/adapters/next'
+import { Cart } from '~/types'
 import { supabase } from './supabase'
 
 export async function createContextInner(
   _opts: trpcNext.CreateNextContextOptions
 ) {
-  const auth = await supabase.auth.api.getUserByCookie(_opts.req)
+  const { token, user } = await supabase.auth.api.getUserByCookie(_opts.req)
 
-  if (auth.token) supabase.auth.setAuth(auth.token)
-  // if (auth.error || !auth.user || !auth.data) throw new Error('Unauthorized')
+  if (token) supabase.auth.setAuth(token)
 
-  return auth
+  const { data: cart } = await supabase
+    .from<Pick<Cart, 'id'>>('cart')
+    .select('id')
+    .match({ user_id: user?.id })
+    .single()
+
+  return { user: { ...user, cartId: cart?.id } }
 }
 
 export type Context = trpc.inferAsyncReturnType<typeof createContextInner>
