@@ -30,3 +30,26 @@ export type Order = {
   }
   total: number
 }
+
+export interface CheckoutFormData {
+  shipping: {
+    email: string
+    firstName: string
+    lastName: string
+    address: string
+    secondaryAddress: string
+    city: string
+    state: string
+    country: string
+    zipCode: string
+    phone: string
+  }
+  billing: {
+    isSameAsShipping: boolean
+  }
+  payment: {
+    cvv: string
+    expiry: string
+    cardNumber: string
+  }
+}

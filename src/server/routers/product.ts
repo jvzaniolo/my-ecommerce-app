@@ -8,8 +8,6 @@ export const productRouter = createRouter()
     async resolve() {
       const { data } = await supabase.from<Product>('product').select('*')
 
-      if (!data) throw new Error('Error fetching products')
-
       return data
     },
   })

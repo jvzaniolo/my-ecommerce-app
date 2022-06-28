@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { FormData } from '~/types/checkout-form'
+import { CheckoutFormData } from '~/types'
 import { trpc } from '~/utils/trpc'
 
 const checkoutFormSchema = z
@@ -57,18 +57,18 @@ const Checkout: NextPage = () => {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<CheckoutFormData>({
     mode: 'onBlur',
     resolver: zodResolver(checkoutFormSchema),
   })
 
   if (cart) {
-    const onPurchase: SubmitHandler<FormData> = async formData => {
+    const onPurchase: SubmitHandler<CheckoutFormData> = async formData => {
       createOrder.mutate(
         { cart },
         {
           onSuccess(data) {
-            utils.invalidateQueries('cart.all')
+            utils.invalidateQueries(['cart.all'])
 
             router.push(`/orders/${data.id}`)
           },

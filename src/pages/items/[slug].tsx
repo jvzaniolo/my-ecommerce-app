@@ -25,7 +25,6 @@ import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
 import { appRouter } from '~/server/routers/_app'
 import { supabase } from '~/server/supabase'
-import { Product } from '~/types'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
@@ -136,9 +135,7 @@ const Item: NextPage = () => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await supabase
-    .from<Pick<Product, 'slug'>>('product')
-    .select('slug')
+  const { data } = await supabase.from('product').select('*')
 
   if (!data) throw new Error('No products found')
 
@@ -148,7 +145,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
         slug: product.slug,
       },
     })),
-    fallback: false,
+    fallback: 'blocking',
   }
 }
 

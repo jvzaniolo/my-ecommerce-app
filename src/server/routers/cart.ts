@@ -7,14 +7,12 @@ import { supabase } from '../supabase'
 export const cartRouter = createRouter()
   .query('all', {
     async resolve() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from<Cart>('cart')
         .select('*, items:cart_item(*, product(*))')
+        .single()
 
-      if (error) throw new Error(error.message)
-      if (!data) throw new Error('No data')
-
-      return data[0]
+      return data
     },
   })
   .mutation('add-item', {

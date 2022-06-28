@@ -8,6 +8,7 @@ export async function createContextInner(
   const auth = await supabase.auth.api.getUserByCookie(_opts.req)
 
   if (auth.token) supabase.auth.setAuth(auth.token)
+  // if (auth.error || !auth.user || !auth.data) throw new Error('Unauthorized')
 
   return auth
 }
