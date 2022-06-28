@@ -1,12 +1,12 @@
 import { Heading, Stack } from '@chakra-ui/react'
 import { FC } from 'react'
 import { Control, UseFormRegister, useFormState } from 'react-hook-form'
-import { FormData } from '~/types/checkout-form'
+import { CheckoutFormData } from '~/types'
 import { Input } from './input'
 
 type ShippingFormType = {
-  control: Control<FormData>
-  register: UseFormRegister<FormData>
+  control: Control<CheckoutFormData>
+  register: UseFormRegister<CheckoutFormData>
 }
 
 export const ShippingForm: FC<ShippingFormType> = ({ register, control }) => {
