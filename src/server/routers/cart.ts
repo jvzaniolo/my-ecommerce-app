@@ -10,6 +10,7 @@ export const cartRouter = createRouter()
       const { data } = await supabase
         .from<Cart>('cart')
         .select('*, items:cart_item(*, product(*))')
+        .order('created_at', { foreignTable: 'cart_item' })
         .single()
 
       return data

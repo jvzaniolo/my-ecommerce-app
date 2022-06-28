@@ -6,6 +6,7 @@ export type Product = {
   slug: string
   image_url: string
   description: string
+  created_at: string
 }
 
 export type Cart = {
@@ -15,7 +16,9 @@ export type Cart = {
     product_id: string
     product: Product
     quantity: number
+    created_at: string
   }[]
+  created_at: string
 }
 
 export type Order = {
@@ -24,11 +27,14 @@ export type Order = {
     id: string
     product: Product
     quantity: number
+    created_at: string
   }[]
   user: {
     email: string
+    created_at: string
   }
   total: number
+  created_at: string
 }
 
 export interface CheckoutFormData {
