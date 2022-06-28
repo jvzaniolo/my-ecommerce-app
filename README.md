@@ -18,14 +18,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 This project uses the following resources
 
-- TypeScript - as the programming language
-- [Supabase](https://supabase.com/) - as the database
-- [React](https://reactjs.org/) - as the UI library
-- [Next.js](https://nextjs.org) - the full-stack framework
-- [SWR](https://swr.vercel.app/) - to handle data fetching and server state
-- [Chakra UI](https://chakra-ui.com/) - UI Components library
-- [React Hook Forms](https://react-hook-form.com/) - to handle huge forms
-- [React Testing Library](https://testing-library.com/) - for testing
+- TypeScript - A strongly typed programming language that builds on JavaScript
+- [Supabase](https://supabase.com/) - Supabase is an open source Firebase alternative
+- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+- [Next.js](https://nextjs.org/) - The React Framework
+- [tRPC](https://trpc.io/) - End-to-end typesafe APIs
+- [React Query](https://react-query.tanstack.com/) - Performant and powerful data synchronization for React
+- [Chakra UI](https://chakra-ui.com/) - A simple, modular and accessible component library
+- [React Hook Forms](https://react-hook-form.com/) - Performant, flexible and extensible forms with easy-to-use validation
+- [React Testing Library](https://testing-library.com/) - Simple and complete testing utilities that encourage good testing practices
 
 ## Author
 
