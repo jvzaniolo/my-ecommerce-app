@@ -8,28 +8,24 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import NextLink from 'next/link'
-import useSWR from 'swr'
 import { OrderSummary } from '~/components/order-summary'
 import { Quantity } from '~/components/quantity'
-import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
-import { axios, fetcher } from '~/services/axios'
-import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
 /**
  * @deprecated
  * @see Using CartDrawer for now
  * @see src/components/cart-drawer.tsx
  */
-const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
-  const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher, {
-    fallbackData: initialCart,
-  })
+const Cart: NextPage = () => {
+  const { data: cart, error } = trpc.useQuery(['cart.all'])
+  const removeItem = trpc.useMutation(['cart.remove-item'])
+  const updateItemQuantity = trpc.useMutation(['cart.update-item-qty'])
 
   if (cart) {
     return (
@@ -77,7 +73,10 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
                         max={item.product.stock}
                         value={item.quantity}
                         onChange={value => {
-                          optimisticUpdateItemQuantity(cart, item.id, value)
+                          updateItemQuantity.mutate({
+                            itemId: item.id,
+                            quantity: value,
+                          })
                         }}
                       />
 
@@ -87,7 +86,7 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
                         </Text>
                         <Button
                           variant="link"
-                          onClick={() => optimisticDeleteItem(cart, item.id)}
+                          onClick={() => removeItem.mutate({ itemId: item.id })}
                         >
                           Remove
                         </Button>
@@ -118,16 +117,6 @@ const Cart: NextPage<{ initialCart: Cart }> = ({ initialCart }) => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const { data: cart } = await axios.get('/api/cart')
-
-  return {
-    props: {
-      initialCart: cart,
-    },
-  }
 }
 
 export default Cart

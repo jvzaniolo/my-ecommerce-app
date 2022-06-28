@@ -13,7 +13,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
+import { createSSGHelpers } from '@trpc/react/ssg'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -21,47 +21,46 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
-import useSWR, { mutate } from 'swr'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { axios, fetcher } from '~/services/axios'
-import { Product } from '~/types'
+import { appRouter } from '~/server/routers/_app'
+import { supabase } from '~/server/supabase'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 
-const Item: NextPage<{ product: Product }> = ({ product }) => {
-  const [quantity, setQuantity] = useState(1)
+const Item: NextPage = () => {
+  const slug = useRouter().query.slug as string
   const toast = useToast()
-  const { query } = useRouter()
   const { onOpenCartDrawer } = useCartDrawer()
-  const { data: item, error } = useSWR<Product, AxiosError>(
-    `/api/products/${query.slug}`,
-    fetcher,
-    {
-      fallbackData: product,
-    }
-  )
+  const [quantity, setQuantity] = useState(1)
+  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }])
+  const utils = trpc.useContext()
+  const mutation = trpc.useMutation(['cart.add-item'])
 
-  async function onAddToCart() {
+  function onAddToCart() {
     if (!item) return
 
-    try {
-      await axios.post(`/api/cart`, {
+    mutation.mutate(
+      {
         productId: item.id,
         quantity,
-      })
-
-      mutate('/api/cart')
-
-      onOpenCartDrawer()
-    } catch (error) {
-      toast({
-        title: 'Error while adding to cart',
-        description: `${item.name} was not added to your cart`,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-    }
+      },
+      {
+        async onSuccess() {
+          await utils.refetchQueries(['cart.all'])
+          onOpenCartDrawer()
+        },
+        onError() {
+          toast({
+            title: 'Error while adding to cart',
+            description: `${item.name} was not added to your cart`,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+        },
+      }
+    )
   }
 
   if (item) {
@@ -92,6 +91,7 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
                   src={item.image_url}
                   alt={item.name}
                   objectFit="cover"
+                  priority
                 />
               </AspectRatio>
             </Box>
@@ -115,6 +115,7 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
                   w="full"
                   type="submit"
                   colorScheme="purple"
+                  isLoading={mutation.isLoading}
                   leftIcon={<MdOutlineAddShoppingCart />}
                   onClick={onAddToCart}
                 >
@@ -134,7 +135,9 @@ const Item: NextPage<{ product: Product }> = ({ product }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await axios.get<Product[]>('/api/products')
+  const { data } = await supabase.from('product').select('*')
+
+  if (!data) throw new Error('No products found')
 
   return {
     paths: data.map(product => ({
@@ -142,18 +145,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
         slug: product.slug,
       },
     })),
-    fallback: false,
+    fallback: 'blocking',
   }
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string
-  const { data: product } = await axios.get(`/api/products/${slug}`)
+export const getStaticProps: GetStaticProps = async context => {
+  const ssg = createSSGHelpers({
+    router: appRouter,
+    ctx: {},
+  })
+
+  const slug = context.params?.slug as string
+
+  await ssg.fetchQuery('product.bySlug', {
+    slug,
+  })
 
   return {
     props: {
-      product,
+      trpcState: ssg.dehydrate(),
+      slug,
     },
+
+    revalidate: 60 * 60 * 24 * 7,
   }
 }
 

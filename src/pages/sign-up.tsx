@@ -6,11 +6,11 @@ import {
   Heading,
   useToast,
 } from '@chakra-ui/react'
-import { yupResolver } from '@hookform/resolvers/yup'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import * as yup from 'yup'
+import { z } from 'zod'
 import { Input } from '~/components/input'
 import { useUser } from '~/contexts/user'
 
@@ -20,14 +20,16 @@ type SignUpFormData = {
   confirmPassword: string
 }
 
-const signUpSchema = yup.object({
-  email: yup.string().email('Email is invalid').required('Email is required'),
-  password: yup.string().required('Password is required'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password'), null], 'Passwords must match')
-    .required('Confirm password is required'),
-})
+const signUpSchema = z
+  .object({
+    email: z.string().min(1, 'Email is required').email('Email is invalid'),
+    password: z.string().min(1, 'Password is required'),
+    confirmPassword: z.string().min(1, 'Confirm password is required'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 const SignUp: NextPage = () => {
   const {
@@ -36,7 +38,7 @@ const SignUp: NextPage = () => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SignUpFormData>({
-    resolver: yupResolver(signUpSchema),
+    resolver: zodResolver(signUpSchema),
   })
   const toast = useToast()
   const { signUp } = useUser()

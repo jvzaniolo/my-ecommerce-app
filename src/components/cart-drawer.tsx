@@ -14,17 +14,13 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { AxiosError } from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
-import useSWR from 'swr'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { optimisticDeleteItem, optimisticUpdateItemQuantity } from '~/lib/cart'
-import { fetcher } from '~/services/axios'
-import { Cart } from '~/types'
 import { toUSCurrency } from '~/utils/format'
+import { trpc } from '~/utils/trpc'
 import { Quantity } from './quantity'
 
 type CartDrawerProps = {
@@ -33,9 +29,11 @@ type CartDrawerProps = {
 }
 
 export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
-  const { data: cart, error } = useSWR<Cart, AxiosError>('/api/cart', fetcher)
-  const { onCloseCartDrawer } = useCartDrawer()
   const router = useRouter()
+  const { onCloseCartDrawer } = useCartDrawer()
+  const { data: cart, error } = trpc.useQuery(['cart.all'])
+  const removeItem = trpc.useMutation(['cart.remove-item'])
+  const updateItemQuantity = trpc.useMutation(['cart.update-item-qty'])
 
   const cartTotal = cart
     ? cart.items.reduce((acc, item) => {
@@ -77,7 +75,7 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                       <Button
                         variant="link"
                         onClick={() => {
-                          optimisticDeleteItem(cart, item.id)
+                          removeItem.mutate({ itemId: item.id })
                         }}
                       >
                         Remove
@@ -87,7 +85,10 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                       max={item.product.stock}
                       value={item.quantity}
                       onChange={value => {
-                        optimisticUpdateItemQuantity(cart, item.id, value)
+                        updateItemQuantity.mutate({
+                          itemId: item.id,
+                          quantity: value,
+                        })
                       }}
                     />
                   </Flex>

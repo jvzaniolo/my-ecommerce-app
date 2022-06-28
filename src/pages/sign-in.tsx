@@ -6,13 +6,13 @@ import {
   Heading,
   useToast,
 } from '@chakra-ui/react'
-import { yupResolver } from '@hookform/resolvers/yup'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import * as yup from 'yup'
+import { z } from 'zod'
 import { Input } from '~/components/input'
 import { useUser } from '~/contexts/user'
 
@@ -21,9 +21,9 @@ type SignUpFormData = {
   password: string
 }
 
-const signUpSchema = yup.object({
-  email: yup.string().email('Email is invalid').required('Email is required'),
-  password: yup.string().required('Password is required'),
+const signUpSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Email is invalid'),
+  password: z.string().min(1, 'Password is required'),
 })
 
 const SignIn: NextPage = () => {
@@ -34,7 +34,7 @@ const SignIn: NextPage = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormData>({
-    resolver: yupResolver(signUpSchema),
+    resolver: zodResolver(signUpSchema),
   })
   const router = useRouter()
   const toast = useToast()
