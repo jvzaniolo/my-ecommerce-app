@@ -29,7 +29,6 @@ This project uses the following resources
 
 ## To Fix 
 
-- [ ] Delete cart items when order is completed
 - [ ] Show billing address if it's not the same as shipping address
 
 ## Author
