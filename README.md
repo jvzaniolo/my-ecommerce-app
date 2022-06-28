@@ -27,10 +27,6 @@ This project uses the following resources
 - [React Hook Forms](https://react-hook-form.com/) - to handle huge forms
 - [React Testing Library](https://testing-library.com/) - for testing
 
-## To Fix 
-
-- [ ] Show billing address if it's not the same as shipping address
-
 ## Author
 
 - [@jvzaniolo](https://github.com/jvzaniolo)
