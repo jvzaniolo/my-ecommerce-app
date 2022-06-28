@@ -24,8 +24,8 @@ import { trpc } from '~/utils/trpc'
  */
 const Cart: NextPage = () => {
   const { data: cart, error } = trpc.useQuery(['cart.all'])
-  const removeItem = trpc.useMutation(['cart.remove-item'])
-  const updateItemQuantity = trpc.useMutation(['cart.update-item-qty'])
+  const removeItem = trpc.useMutation(['cart.remove'])
+  const updateItemQuantity = trpc.useMutation(['cart.update-quantity'])
 
   if (cart) {
     return (

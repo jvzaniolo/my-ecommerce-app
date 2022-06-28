@@ -19,6 +19,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import {
+  useRemoveCartItemMutation,
+  useUpdateCartItemMutation,
+} from '~/lib/useCartQuery'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 import { Quantity } from './quantity'
@@ -32,8 +36,8 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const router = useRouter()
   const { onCloseCartDrawer } = useCartDrawer()
   const { data: cart, error } = trpc.useQuery(['cart.all'])
-  const removeItem = trpc.useMutation(['cart.remove-item'])
-  const updateItemQuantity = trpc.useMutation(['cart.update-item-qty'])
+  const removeItem = useRemoveCartItemMutation()
+  const updateItemQuantity = useUpdateCartItemMutation()
 
   const cartTotal = cart
     ? cart.items.reduce((acc, item) => {
