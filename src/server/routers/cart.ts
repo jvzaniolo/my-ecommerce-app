@@ -1,19 +1,24 @@
 import { z } from 'zod'
-import { Cart } from '~/types'
 import { Context } from '../context'
 import { createRouter } from '../createRouter'
-import { supabase } from '../supabase'
+import { prisma } from '../prisma'
 
 export const cartRouter = createRouter()
   .query('all', {
-    async resolve() {
-      const { data } = await supabase
-        .from<Cart>('cart')
-        .select('*, items:cart_item(*, product(*))')
-        .order('created_at', { foreignTable: 'cart_item' })
-        .single()
+    async resolve({ ctx }) {
+      const { user } = ctx as Context
 
-      return data
+      return await prisma.cart.findFirst({
+        where: { userId: user.id },
+        include: {
+          cartItems: {
+            include: { product: true },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      })
     },
   })
   .mutation('add-item', {
@@ -24,40 +29,26 @@ export const cartRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      // Find existing item in cart
-      const cartItemRes = await supabase
-        .from<Pick<Cart['items'][0], 'id' | 'quantity'>>('cart_item')
-        .select('id, quantity')
-        .match({ product_id: input.productId })
-        .single()
+      if (!user.id) throw new Error('User not found')
 
-      // If cart item exists, update the quantity with the new quantity
-      if (cartItemRes.data) {
-        const updatedItemRes = await supabase
-          .from('cart_item')
-          .update({ quantity: cartItemRes.data.quantity + input.quantity })
-          .select('*, product(*)')
-          .match({ product_id: input.productId })
-          .single()
-
-        return updatedItemRes.data
-      }
-
-      // Or else, create a new cart item
-      const newItemRes = await supabase
-        .from('cart_item')
-        .insert([
-          {
-            quantity: input.quantity,
-            cart_id: user.cartId,
-            user_id: user?.id,
-            product_id: input.productId,
+      return await prisma.cart.update({
+        where: { userId: user.id },
+        data: {
+          cartItems: {
+            upsert: {
+              where: { productId: input.productId },
+              create: {
+                userId: user.id,
+                productId: input.productId,
+                quantity: input.quantity,
+              },
+              update: {
+                quantity: input.quantity,
+              },
+            },
           },
-        ])
-        .select('*, product(*)')
-        .single()
-
-      return newItemRes.data
+        },
+      })
     },
   })
   .mutation('update-quantity', {
@@ -65,15 +56,21 @@ export const cartRouter = createRouter()
       itemId: z.string(),
       quantity: z.number().min(1),
     }),
-    async resolve({ input }) {
-      const { data } = await supabase
-        .from('cart_item')
-        .update({ quantity: input.quantity })
-        .select('*, product(*)')
-        .match({ id: input.itemId })
-        .single()
+    async resolve({ input, ctx }) {
+      const { user } = ctx as Context
 
-      return data
+      return await prisma.cart.update({
+        where: { userId: user.id },
+        data: {
+          cartItems: {
+            update: {
+              where: { id: input.itemId },
+              data: { quantity: input.quantity },
+            },
+          },
+        },
+        include: { cartItems: { include: { product: true } } },
+      })
     },
   })
   .mutation('remove', {
@@ -81,11 +78,9 @@ export const cartRouter = createRouter()
       itemId: z.string(),
     }),
     async resolve({ input }) {
-      const { data } = await supabase
-        .from('cart_item')
-        .delete()
-        .match({ id: input.itemId })
-
-      return data
+      return await prisma.cartItem.delete({
+        where: { id: input.itemId },
+        include: { product: true },
+      })
     },
   })
