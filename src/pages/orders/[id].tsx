@@ -13,11 +13,12 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
+import { supabase } from '~/server/supabase'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
@@ -107,6 +108,23 @@ const Order: NextPage = () => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
+}
+
+export const getServerSideProps: GetServerSideProps = async context => {
+  const { data: user } = await supabase.auth.api.getUserByCookie(context.req)
+
+  if (!user) {
+    return {
+      redirect: {
+        destination: '/sign-in',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
 }
 
 export default Order
