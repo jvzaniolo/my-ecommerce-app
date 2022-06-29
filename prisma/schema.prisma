@@ -8,13 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  createdAt DateTime    @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
   email     String
-  cart      Cart[]
-  cartItem  CartItem[]
   order     Order[]
-  orderItem OrderItem[]
+  cartId    String
+  Cart      Cart?
 }
 
 model Product {
@@ -33,27 +32,26 @@ model Product {
 model Cart {
   id        String     @id @default(uuid())
   createdAt DateTime   @default(now())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String     @unique
   cartItems CartItem[]
+  user      User       @relation(fields: [userId], references: [id])
 }
 
 model CartItem {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  userId    String
-  cartId    String
-  productId String
+  userId    String   @unique
+  cartId    String   @unique
+  productId String   @unique
   quantity  Int
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Order {
   id         String      @id @default(uuid())
   createdAt  DateTime    @default(now())
-  userId     String
+  userId     String      @unique
   status     String      @default("pending")
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
@@ -62,11 +60,9 @@ model Order {
 model OrderItem {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  productId String
-  userId    String
-  orderId   String
+  productId String   @unique
+  orderId   String   @unique
   quantity  Int
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: SetNull)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
