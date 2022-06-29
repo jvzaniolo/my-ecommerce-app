@@ -10,13 +10,13 @@ import { AppRouter } from '~/server/routers/_app'
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <ChakraProvider>
-      <CartDrawerProvider>
-        <UserProvider>
+      <UserProvider>
+        <CartDrawerProvider>
           <Layout>
             <Component {...pageProps} />
           </Layout>
-        </UserProvider>
-      </CartDrawerProvider>
+        </CartDrawerProvider>
+      </UserProvider>
 
       <ReactQueryDevtools />
     </ChakraProvider>

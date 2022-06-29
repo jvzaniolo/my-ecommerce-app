@@ -8,7 +8,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -16,6 +16,7 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
+import { supabase } from '~/server/supabase'
 import { CheckoutFormData } from '~/types'
 import { trpc } from '~/utils/trpc'
 
@@ -167,6 +168,24 @@ const Checkout: NextPage = () => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const { data: user } = await supabase.auth.api.getUserByCookie(req)
+
+  if (!user) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/sign-in',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
 }
 
 export default Checkout
