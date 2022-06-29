@@ -1,14 +1,11 @@
 import { z } from 'zod'
-import { Product } from '~/types'
 import { createRouter } from '../createRouter'
-import { supabase } from '../supabase'
+import { prisma } from '../prisma'
 
 export const productRouter = createRouter()
   .query('all', {
     async resolve() {
-      const { data } = await supabase.from<Product>('product').select('*')
-
-      return data
+      return await prisma.product.findMany()
     },
   })
   .query('bySlug', {
@@ -16,13 +13,6 @@ export const productRouter = createRouter()
       slug: z.string(),
     }),
     async resolve({ input }) {
-      const { data } = await supabase
-        .from<Product>('product')
-        .select('*')
-        .match({ slug: input.slug })
-
-      if (!data) throw new Error('Product not found')
-
-      return data[0]
+      return await prisma.product.findFirst({ where: { slug: input.slug } })
     },
   })
