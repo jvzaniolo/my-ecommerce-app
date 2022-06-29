@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  email     String
+  cart      Cart[]
+  cartItem  CartItem[]
+  order     Order[]
+  orderItem OrderItem[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  name        String
+  description String
+  stock       Int
+  price       Float
+  slug        String
+  imageUrl    String
+  cartItem    CartItem[]
+  orderItem   OrderItem[]
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  userId    String
+  cartId    String
+  productId String
+  quantity  Int
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  createdAt  DateTime    @default(now())
+  userId     String
+  status     String      @default("pending")
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  productId String
+  userId    String
+  orderId   String
+  quantity  Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
