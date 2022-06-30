@@ -65,7 +65,7 @@ export const CartDrawer: FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                     <AspectRatio ratio={1} flex="1">
                       <Img
                         as={Image}
-                        src={item.product.image_url}
+                        src={item.product.imageUrl}
                         alt={item.product.name}
                         layout="fill"
                         objectFit="cover"

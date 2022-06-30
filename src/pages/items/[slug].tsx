@@ -23,8 +23,8 @@ import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { prisma } from '~/server/prisma'
 import { appRouter } from '~/server/routers/_app'
-import { supabase } from '~/server/supabase'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
@@ -88,7 +88,7 @@ const Item: NextPage = () => {
                 <Img
                   as={Image}
                   layout="fill"
-                  src={item.image_url}
+                  src={item.imageUrl}
                   alt={item.name}
                   objectFit="cover"
                   priority
@@ -135,12 +135,10 @@ const Item: NextPage = () => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await supabase.from('product').select('*')
-
-  if (!data) throw new Error('No products found')
+  const products = await prisma.product.findMany()
 
   return {
-    paths: data.map(product => ({
+    paths: products.map(product => ({
       params: {
         slug: product.slug,
       },
@@ -164,7 +162,6 @@ export const getStaticProps: GetStaticProps = async context => {
   return {
     props: {
       trpcState: ssg.dehydrate(),
-      slug,
     },
 
     revalidate: 60 * 60 * 24 * 7,

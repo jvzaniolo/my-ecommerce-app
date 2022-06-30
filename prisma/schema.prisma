@@ -8,12 +8,11 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id
   createdAt DateTime @default(now())
   email     String
   order     Order[]
-  cartId    String
-  Cart      Cart?
+  cart      Cart?
 }
 
 model Product {
@@ -25,16 +24,16 @@ model Product {
   price       Float
   slug        String
   imageUrl    String
-  cartItem    CartItem[]
-  orderItem   OrderItem[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 }
 
 model Cart {
   id        String     @id @default(uuid())
   createdAt DateTime   @default(now())
   userId    String     @unique
-  cartItems CartItem[]
-  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CartItem {
@@ -49,12 +48,12 @@ model CartItem {
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  createdAt  DateTime    @default(now())
-  userId     String      @unique
-  status     String      @default("pending")
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderItems OrderItem[]
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  userId    String      @unique
+  status    String      @default("pending")
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     OrderItem[]
 }
 
 model OrderItem {

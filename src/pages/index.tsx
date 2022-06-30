@@ -46,7 +46,7 @@ const Home: NextPage = () => {
                 <AspectRatio ratio={4 / 3}>
                   <Img
                     as={NextImage}
-                    src={item.image_url}
+                    src={item.imageUrl}
                     alt={item.name}
                     layout="fill"
                     objectFit="cover"

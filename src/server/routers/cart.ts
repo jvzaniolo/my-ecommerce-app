@@ -8,10 +8,10 @@ export const cartRouter = createRouter()
     async resolve({ ctx }) {
       const { user } = ctx as Context
 
-      return await prisma.cart.findFirst({
+      const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
         include: {
-          cartItems: {
+          items: {
             include: { product: true },
           },
         },
@@ -19,36 +19,45 @@ export const cartRouter = createRouter()
           createdAt: 'asc',
         },
       })
+
+      return cart
     },
   })
   .mutation('add-item', {
     input: z.object({
       productId: z.string(),
-      quantity: z.number().min(0),
+      quantity: z.number().min(1),
     }),
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
       if (!user.id) throw new Error('User not found')
 
-      return await prisma.cart.update({
+      const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
-        data: {
-          cartItems: {
-            upsert: {
-              where: { productId: input.productId },
-              create: {
-                userId: user.id,
-                productId: input.productId,
-                quantity: input.quantity,
-              },
-              update: {
-                quantity: input.quantity,
-              },
-            },
+        select: { id: true },
+      })
+
+      if (!cart) throw new Error('Cart not found')
+
+      const raw =
+        await prisma.$executeRaw`INSERT INTO "public"."CartItem" ("cartId","productId","userId","quantity") VALUES (${cart.id},${input.productId},${user.id},${input.quantity});`
+
+      console.log({ raw })
+
+      const newCart = await prisma.cart.findFirst({
+        where: { userId: user.id },
+        include: {
+          items: {
+            include: { product: true },
           },
         },
+        orderBy: {
+          createdAt: 'asc',
+        },
       })
+
+      return newCart
     },
   })
   .mutation('update-quantity', {
@@ -59,18 +68,20 @@ export const cartRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      return await prisma.cart.update({
+      const cart = await prisma.cart.update({
         where: { userId: user.id },
         data: {
-          cartItems: {
+          items: {
             update: {
               where: { id: input.itemId },
               data: { quantity: input.quantity },
             },
           },
         },
-        include: { cartItems: { include: { product: true } } },
+        include: { items: { include: { product: true } } },
       })
+
+      return cart
     },
   })
   .mutation('remove', {
@@ -78,9 +89,11 @@ export const cartRouter = createRouter()
       itemId: z.string(),
     }),
     async resolve({ input }) {
-      return await prisma.cartItem.delete({
+      const cart = await prisma.cartItem.delete({
         where: { id: input.itemId },
         include: { product: true },
       })
+
+      return cart
     },
   })

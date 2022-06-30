@@ -5,7 +5,9 @@ import { prisma } from '../prisma'
 export const productRouter = createRouter()
   .query('all', {
     async resolve() {
-      return await prisma.product.findMany()
+      const products = await prisma.product.findMany()
+
+      return products.map(p => ({ ...p, createdAt: p.createdAt.toISOString() }))
     },
   })
   .query('bySlug', {
@@ -13,6 +15,10 @@ export const productRouter = createRouter()
       slug: z.string(),
     }),
     async resolve({ input }) {
-      return await prisma.product.findFirst({ where: { slug: input.slug } })
+      const product = await prisma.product.findFirst({
+        where: { slug: input.slug },
+      })
+
+      return { ...product, createdAt: product?.createdAt.toISOString() }
     },
   })
