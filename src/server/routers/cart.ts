@@ -40,10 +40,42 @@ export const cartRouter = createRouter()
 
       if (!cart) throw new Error('Cart not found')
 
-      const raw =
-        await prisma.$executeRaw`INSERT INTO "public"."CartItem" ("cartId","productId","userId","quantity") VALUES (${cart.id},${input.productId},${user.id},${input.quantity});`
+      // const raw =
+      //   await prisma.$executeRaw`INSERT INTO "public"."CartItem" ("cartId","productId","userId","quantity") VALUES (${cart.id},${input.productId},${user.id},${input.quantity});`
 
-      console.log({ raw })
+      const hasCartItem = await prisma.cartItem.findFirst({
+        where: { productId: input.productId, cartId: cart.id },
+        select: { quantity: true },
+      })
+
+      if (hasCartItem) {
+        return await prisma.cart.update({
+          where: { userId: user.id },
+          data: {
+            items: {
+              update: {
+                where: { productId: input.productId },
+                data: { quantity: hasCartItem.quantity + input.quantity },
+              },
+            },
+          },
+        })
+      }
+
+      return await prisma.cart.update({
+        where: { userId: user.id },
+        data: {
+          items: {
+            create: {
+              userId: user.id,
+              productId: input.productId,
+              quantity: input.quantity,
+            },
+          },
+        },
+      })
+
+      // console.log({ raw })
 
       const newCart = await prisma.cart.findFirst({
         where: { userId: user.id },
