@@ -39,7 +39,6 @@ model Cart {
 model CartItem {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  userId    String   @unique
   cartId    String   @unique
   productId String   @unique
   quantity  Int
