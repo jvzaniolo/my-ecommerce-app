@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react'
-import Quantity from '~/components/quantity'
+import { Quantity } from './quantity'
 
 describe('Quantity', () => {
   it('should render the quantity with initial props', () => {
     const { container } = render(
-      <Quantity value={1} onChange={() => {}} maxQuantity={100} />
+      <Quantity value={1} onChange={() => {}} max={100} />
     )
 
     expect(container).toMatchSnapshot()
@@ -13,7 +13,7 @@ describe('Quantity', () => {
   it('should increase the quantity when the increase button is clicked', () => {
     const onChange = jest.fn()
     const { getByTestId } = render(
-      <Quantity value={1} onChange={onChange} maxQuantity={100} />
+      <Quantity value={1} onChange={onChange} max={100} />
     )
 
     const increaseButton = getByTestId('increase-quantity')
@@ -25,7 +25,7 @@ describe('Quantity', () => {
   it('should decrease the quantity when the decrease button is clicked', () => {
     const onChange = jest.fn()
     const { getByTestId } = render(
-      <Quantity value={2} onChange={onChange} maxQuantity={100} />
+      <Quantity value={2} onChange={onChange} max={100} />
     )
 
     const decreaseButton = getByTestId('decrease-quantity')
@@ -37,7 +37,7 @@ describe('Quantity', () => {
   it('should not increase more than the maxQuantity value', () => {
     const onChange = jest.fn()
     const { getByTestId } = render(
-      <Quantity value={1} onChange={onChange} maxQuantity={1} />
+      <Quantity value={1} onChange={onChange} max={1} />
     )
 
     const increaseButton = getByTestId('increase-quantity')
@@ -49,7 +49,7 @@ describe('Quantity', () => {
   it('should not decrease to less than one', () => {
     const onChange = jest.fn()
     const { getByTestId } = render(
-      <Quantity value={1} onChange={onChange} maxQuantity={100} />
+      <Quantity value={1} onChange={onChange} max={100} />
     )
 
     const decreaseButton = getByTestId('decrease-quantity')
