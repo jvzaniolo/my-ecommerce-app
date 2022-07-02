@@ -3,11 +3,7 @@ import { FC, ReactNode } from 'react'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
-type OrderSummary = {
-  children: ReactNode
-}
-
-export const OrderSummary: FC<OrderSummary> = ({ children }) => {
+export const OrderSummary: FC<{ children: ReactNode }> = ({ children }) => {
   const { data: cart, error } = trpc.useQuery(['cart.all'])
 
   const cartTotal = cart
