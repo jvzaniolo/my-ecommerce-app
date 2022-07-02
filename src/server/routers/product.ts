@@ -19,6 +19,8 @@ export const productRouter = createRouter()
         where: { slug: input.slug },
       })
 
-      return { ...product, createdAt: product?.createdAt.toISOString() }
+      if (!product) throw new Error('Product not found')
+
+      return { ...product, createdAt: product.createdAt.toISOString() }
     },
   })
