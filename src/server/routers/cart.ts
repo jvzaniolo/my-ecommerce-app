@@ -9,15 +9,9 @@ export const cartRouter = createRouter()
       const { user } = ctx as Context
 
       const cart = await prisma.cart.findFirst({
-        where: { userId: user.id },
-        include: {
-          items: {
-            include: { product: true },
-          },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
+        where: { userId: user?.id },
+        include: { items: { include: { product: true } } },
+        orderBy: { createdAt: 'asc' },
       })
 
       return cart
@@ -31,7 +25,7 @@ export const cartRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      if (!user.id) throw new Error('User not found')
+      if (!user?.id) throw new Error('User not found')
 
       const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
@@ -40,16 +34,13 @@ export const cartRouter = createRouter()
 
       if (!cart) throw new Error('Cart not found')
 
-      // const raw =
-      //   await prisma.$executeRaw`INSERT INTO "public"."CartItem" ("cartId","productId","userId","quantity") VALUES (${cart.id},${input.productId},${user.id},${input.quantity});`
-
       const hasCartItem = await prisma.cartItem.findFirst({
         where: { productId: input.productId, cartId: cart.id },
         select: { quantity: true },
       })
 
       if (hasCartItem) {
-        return await prisma.cart.update({
+        const updatedCart = await prisma.cart.update({
           where: { userId: user.id },
           data: {
             items: {
@@ -59,37 +50,26 @@ export const cartRouter = createRouter()
               },
             },
           },
+          include: { items: { include: { product: true } } },
         })
+
+        return updatedCart
       }
 
-      return await prisma.cart.update({
+      const updatedCart = await prisma.cart.update({
         where: { userId: user.id },
         data: {
           items: {
             create: {
-              userId: user.id,
               productId: input.productId,
               quantity: input.quantity,
             },
           },
         },
+        include: { items: { include: { product: true } } },
       })
 
-      // console.log({ raw })
-
-      const newCart = await prisma.cart.findFirst({
-        where: { userId: user.id },
-        include: {
-          items: {
-            include: { product: true },
-          },
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      })
-
-      return newCart
+      return updatedCart
     },
   })
   .mutation('update-quantity', {
@@ -101,7 +81,7 @@ export const cartRouter = createRouter()
       const { user } = ctx as Context
 
       const cart = await prisma.cart.update({
-        where: { userId: user.id },
+        where: { userId: user?.id },
         data: {
           items: {
             update: {
@@ -120,10 +100,19 @@ export const cartRouter = createRouter()
     input: z.object({
       itemId: z.string(),
     }),
-    async resolve({ input }) {
-      const cart = await prisma.cartItem.delete({
-        where: { id: input.itemId },
-        include: { product: true },
+    async resolve({ input, ctx }) {
+      const { user } = ctx as Context
+
+      const cart = await prisma.cart.update({
+        where: { userId: user?.id },
+        data: {
+          items: {
+            delete: {
+              id: input.itemId,
+            },
+          },
+        },
+        include: { items: { include: { product: true } } },
       })
 
       return cart
