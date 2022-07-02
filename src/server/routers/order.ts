@@ -9,10 +9,10 @@ export const orderRouter = createRouter()
       const { user } = ctx as Context
 
       const order = await prisma.order.findFirst({
-        where: { userId: user.id },
+        where: { userId: user?.id },
         include: {
           user: true,
-          orderItems: {
+          items: {
             include: { product: true },
             orderBy: { createdAt: 'desc' },
           },
@@ -31,10 +31,10 @@ export const orderRouter = createRouter()
       const { user } = ctx as Context
 
       const order = await prisma.order.findFirst({
-        where: { userId: user.id, id: input.id },
+        where: { userId: user?.id, id: input.id },
         include: {
           user: true,
-          orderItems: {
+          items: {
             include: { product: true },
             orderBy: { createdAt: 'desc' },
           },
@@ -58,19 +58,21 @@ export const orderRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      if (!user.id) throw new Error('User not found')
+      if (!user?.id) throw new Error('User not found')
 
       const order = await prisma.order.create({
         data: {
           userId: user.id,
-          orderItems: {
-            create: input.cart.items.map(i => ({
-              productId: i.productId,
-              quantity: i.quantity,
-            })),
+          items: {
+            createMany: {
+              data: input.cart.items.map(i => ({
+                productId: i.productId,
+                quantity: i.quantity,
+              })),
+            },
           },
         },
-        include: { user: true, orderItems: { include: { product: true } } },
+        include: { user: true, items: { include: { product: true } } },
       })
 
       return order
