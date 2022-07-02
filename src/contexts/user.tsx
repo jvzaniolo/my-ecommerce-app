@@ -1,5 +1,5 @@
 import { useToast } from '@chakra-ui/react'
-import { Session, User } from '@supabase/supabase-js'
+import { Session } from '@supabase/supabase-js'
 import {
   createContext,
   ReactNode,
@@ -7,12 +7,15 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { InferMutationOutput } from '~/pages/api/trpc/[trpc]'
 import { supabase } from '~/server/supabase'
 import { axios } from '~/utils/axios'
 import { trpc } from '~/utils/trpc'
 
+type User = InferMutationOutput<'user.signIn'>['user']
+
 type UserContextValue = {
-  user: User | null
+  user: User
   session: Session | null
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -26,17 +29,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const utils = trpc.useContext()
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const signInMutation = trpc.useMutation(['user.signIn'])
+  const signUpMutation = trpc.useMutation(['user.create'])
 
   useEffect(() => {
     const session = supabase.auth.session()
 
     setSession(session)
-    setUser(session?.user ?? null)
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session)
-        setUser(session?.user ?? null)
 
         if (session) {
           await axios.post('/api/auth', { event, session })
@@ -51,20 +54,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       authListener?.unsubscribe()
     }
-  }, [])
+  }, [utils])
 
   async function signIn(email: string, password: string) {
-    const { session, user, error } = await supabase.auth.signIn({
-      email,
-      password,
-    })
-
-    if (error) return Promise.reject(error)
-
-    setUser(user)
-    setSession(session)
-
-    return Promise.resolve()
+    signInMutation.mutate(
+      {
+        email,
+        password,
+      },
+      {
+        onSuccess({ user, session }) {
+          setUser(user)
+          setSession(session)
+        },
+      }
+    )
   }
 
   async function signOut() {
@@ -77,24 +81,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }
 
   async function signUp(email: string, password: string) {
-    const { session, user, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    signUpMutation.mutate(
+      {
+        email,
+        password,
+      },
+      {
+        onSuccess({ user, session }) {
+          if (!session) {
+            toast({
+              title: 'Sign Up',
+              description: 'Please confirm your e-mail before signing in.',
+              status: 'success',
+              duration: 5000,
+            })
+          }
 
-    if (error) return Promise.reject(error)
-
-    if (!session) {
-      toast({
-        title: 'Sign Up',
-        description: 'Please confirm your e-mail before signing in.',
-        status: 'success',
-        duration: 5000,
-      })
-    }
-
-    setUser(user)
-    setSession(session)
+          setUser(user)
+          setSession(session)
+        },
+      }
+    )
   }
 
   return (
