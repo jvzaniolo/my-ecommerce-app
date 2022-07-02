@@ -14,12 +14,6 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { useUser } from '~/contexts/user'
 
-type SignUpFormData = {
-  email: string
-  password: string
-  confirmPassword: string
-}
-
 const signUpSchema = z
   .object({
     email: z.string().min(1, 'Email is required').email('Email is invalid'),
@@ -30,6 +24,8 @@ const signUpSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   })
+
+type SignUpFormData = z.infer<typeof signUpSchema>
 
 const SignUp: NextPage = () => {
   const {
