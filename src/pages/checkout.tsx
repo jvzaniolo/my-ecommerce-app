@@ -17,35 +17,34 @@ import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
 import { supabase } from '~/server/supabase'
-import { CheckoutFormData } from '~/types'
 import { trpc } from '~/utils/trpc'
 
-const checkoutFormSchema = z
-  .object({
-    shipping: z.object({
-      email: z.string().min(1, 'Email is required'),
-      firstName: z.string().min(1, 'First name is required'),
-      lastName: z.string().min(1, 'Last name is required'),
-      address: z.string().min(1, 'Address is required'),
-      secondaryAddress: z.string().optional(),
-      city: z.string().min(1, 'City is required'),
-      state: z.string().min(1, 'State is required'),
-      zipCode: z.string().min(1, 'Zip code is required'),
-      country: z.string().min(1, 'Country is required'),
-      phone: z.string().min(1, 'Phone is required'),
-    }),
-    billing: z.object({
-      isSameAsShipping: z.boolean(),
-    }),
-    payment: z.object({
-      cardNumber: z.string().length(16, 'Card number is invalid'),
-      expiry: z
-        .string()
-        .regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, 'Expiry is invalid'),
-      cvv: z.string().length(3, 'CVV is invalid'),
-    }),
-  })
-  .catchall(z.string())
+const checkoutFormSchema = z.object({
+  shipping: z.object({
+    email: z.string().min(1, 'Email is required'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    address: z.string().min(1, 'Address is required'),
+    secondaryAddress: z.string().optional(),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zipCode: z.string().min(1, 'Zip code is required'),
+    country: z.string().min(1, 'Country is required'),
+    phone: z.string().min(1, 'Phone is required'),
+  }),
+  billing: z.object({
+    isSameAsShipping: z.boolean(),
+  }),
+  payment: z.object({
+    cardNumber: z.string().length(16, 'Card number is invalid'),
+    expiry: z
+      .string()
+      .regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, 'Expiry is invalid'),
+    cvv: z.string().length(3, 'CVV is invalid'),
+  }),
+})
+
+export type CheckoutFormSchema = z.infer<typeof checkoutFormSchema>
 
 const Checkout: NextPage = () => {
   const toast = useToast()
@@ -58,13 +57,13 @@ const Checkout: NextPage = () => {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<CheckoutFormData>({
+  } = useForm<CheckoutFormSchema>({
     mode: 'onBlur',
     resolver: zodResolver(checkoutFormSchema),
   })
 
   if (cart) {
-    const onPurchase: SubmitHandler<CheckoutFormData> = async formData => {
+    const onPurchase: SubmitHandler<CheckoutFormSchema> = async formData => {
       createOrder.mutate(
         { cart },
         {
