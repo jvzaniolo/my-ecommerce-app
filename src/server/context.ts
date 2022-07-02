@@ -5,9 +5,17 @@ import { supabase } from './supabase'
 export async function createContextInner(
   _opts: trpcNext.CreateNextContextOptions
 ) {
-  const { token, user } = await supabase.auth.api.getUserByCookie(_opts.req)
+  if (_opts.req.url?.includes('api/trpc/auth.create')) {
+    if (_opts.req.method === 'POST') {
+      supabase.auth.api.setAuthCookie(_opts.req, _opts.res)
+    }
 
-  if (token) supabase.auth.setAuth(token)
+    if (_opts.req.method === 'DELETE') {
+      supabase.auth.api.deleteAuthCookie(_opts.req, _opts.res, {})
+    }
+  }
+
+  const { user } = await supabase.auth.api.getUserByCookie(_opts.req)
 
   return { user }
 }

@@ -7,15 +7,14 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { InferMutationOutput } from '~/pages/api/trpc/[trpc]'
+import { InferQueryOutput } from '~/pages/api/trpc/[trpc]'
 import { supabase } from '~/server/supabase'
-import { axios } from '~/utils/axios'
 import { trpc } from '~/utils/trpc'
 
-type User = InferMutationOutput<'user.signIn'>['user']
+type User = InferQueryOutput<'user.byEmail'>
 
 type UserContextValue = {
-  user: User
+  user: User | undefined
   session: Session | null
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -27,10 +26,10 @@ const UserContext = createContext<UserContextValue | null>(null)
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const toast = useToast()
   const utils = trpc.useContext()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | undefined>(undefined)
   const [session, setSession] = useState<Session | null>(null)
-  const signInMutation = trpc.useMutation(['user.signIn'])
-  const signUpMutation = trpc.useMutation(['user.create'])
+  const query = trpc.useQuery(['user.byEmail', { email: session?.user?.email }])
+  const createUser = trpc.useMutation(['user.create'])
 
   useEffect(() => {
     const session = supabase.auth.session()
@@ -42,9 +41,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setSession(session)
 
         if (session) {
-          await axios.post('/api/auth', { event, session })
+          await fetch(
+            `${
+              process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'
+            }/api/auth`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ event, session }),
+            }
+          )
         } else {
-          await axios.delete('/api/auth')
+          await fetch(
+            `${
+              process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000'
+            }/api/auth`,
+            {
+              method: 'DELETE',
+            }
+          )
         }
 
         utils.invalidateQueries('cart.all')
@@ -57,18 +74,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [utils])
 
   async function signIn(email: string, password: string) {
-    signInMutation.mutate(
-      {
-        email,
-        password,
-      },
-      {
-        onSuccess({ user, session }) {
-          setUser(user)
-          setSession(session)
-        },
-      }
-    )
+    const {
+      session,
+      user: authUser,
+      error,
+    } = await supabase.auth.signIn({
+      email,
+      password,
+    })
+
+    if (error) throw error
+    if (!authUser?.email) throw new Error('User not found on supabase')
+
+    setSession(session)
+
+    await query.refetch()
+
+    setUser(query.data)
   }
 
   async function signOut() {
@@ -76,32 +98,34 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     if (error) return Promise.reject(error)
 
-    setUser(null)
+    setUser(undefined)
     setSession(null)
   }
 
   async function signUp(email: string, password: string) {
-    signUpMutation.mutate(
-      {
-        email,
-        password,
-      },
-      {
-        onSuccess({ user, session }) {
-          if (!session) {
-            toast({
-              title: 'Sign Up',
-              description: 'Please confirm your e-mail before signing in.',
-              status: 'success',
-              duration: 5000,
-            })
-          }
+    const {
+      session,
+      user: authUser,
+      error,
+    } = await supabase.auth.signUp({
+      email,
+      password,
+    })
 
-          setUser(user)
-          setSession(session)
-        },
-      }
-    )
+    if (error) throw error
+    if (!authUser?.email) throw new Error('User not found on supabase')
+    setSession(session)
+
+    if (!session) {
+      toast({
+        title: 'Sign Up',
+        description: 'Please confirm your e-mail before signing in.',
+        status: 'success',
+        duration: 5000,
+      })
+    }
+
+    createUser.mutate({ id: authUser.id, email: authUser.email })
   }
 
   return (
