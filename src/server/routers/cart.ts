@@ -9,9 +9,9 @@ export const cartRouter = createRouter()
       const { user } = ctx as Context
 
       const cart = await prisma.cart.findFirst({
-        where: { userId: user?.id },
+        where: { userId: user.id },
         include: { items: { include: { product: true } } },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       })
 
       return cart
@@ -25,8 +25,6 @@ export const cartRouter = createRouter()
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
 
-      if (!user?.id) throw new Error('User not found')
-
       const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
         select: { id: true },
@@ -36,7 +34,7 @@ export const cartRouter = createRouter()
 
       const hasCartItem = await prisma.cartItem.findFirst({
         where: { productId: input.productId, cartId: cart.id },
-        select: { quantity: true },
+        select: { id: true, quantity: true },
       })
 
       if (hasCartItem) {
@@ -45,7 +43,7 @@ export const cartRouter = createRouter()
           data: {
             items: {
               update: {
-                where: { productId: input.productId },
+                where: { id: hasCartItem.id },
                 data: { quantity: hasCartItem.quantity + input.quantity },
               },
             },
@@ -81,7 +79,7 @@ export const cartRouter = createRouter()
       const { user } = ctx as Context
 
       const cart = await prisma.cart.update({
-        where: { userId: user?.id },
+        where: { userId: user.id },
         data: {
           items: {
             update: {
@@ -104,7 +102,7 @@ export const cartRouter = createRouter()
       const { user } = ctx as Context
 
       const cart = await prisma.cart.update({
-        where: { userId: user?.id },
+        where: { userId: user.id },
         data: {
           items: {
             delete: {

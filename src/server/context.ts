@@ -17,6 +17,8 @@ export async function createContextInner(
 
   const { user } = await supabase.auth.api.getUserByCookie(_opts.req)
 
+  if (!user) throw new Error('User not found')
+
   return { user }
 }
 

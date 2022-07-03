@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "commit": "commit",
-    "seed": "prisma db seed"
+    "commit": "commit"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.2.1",

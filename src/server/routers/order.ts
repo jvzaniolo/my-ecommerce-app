@@ -9,7 +9,7 @@ export const orderRouter = createRouter()
       const { user } = ctx as Context
 
       const order = await prisma.order.findFirst({
-        where: { userId: user?.id },
+        where: { userId: user.id },
         include: {
           user: true,
           items: {
@@ -31,7 +31,7 @@ export const orderRouter = createRouter()
       const { user } = ctx as Context
 
       const order = await prisma.order.findFirst({
-        where: { userId: user?.id, id: input.id },
+        where: { userId: user.id, id: input.id },
         include: {
           user: true,
           items: {
@@ -57,8 +57,6 @@ export const orderRouter = createRouter()
     }),
     async resolve({ input, ctx }) {
       const { user } = ctx as Context
-
-      if (!user?.id) throw new Error('User not found')
 
       const order = await prisma.order.create({
         data: {
