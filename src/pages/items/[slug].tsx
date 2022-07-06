@@ -14,22 +14,65 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { createSSGHelpers } from '@trpc/react/ssg'
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import {
+  GetStaticPaths,
+  GetStaticPropsContext,
+  InferGetStaticPropsType,
+  NextPage,
+} from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { MdOutlineAddShoppingCart } from 'react-icons/md'
+import superjson from 'superjson'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { prisma } from '~/server/prisma'
+import { createContext } from '~/server/context'
+import { prisma } from '~/server/db/prisma'
 import { appRouter } from '~/server/routers/_app'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
-const Item: NextPage = () => {
-  const slug = useRouter().query.slug as string
+export const getStaticPaths: GetStaticPaths = async () => {
+  const products = await prisma.product.findMany()
+
+  return {
+    paths: products.map(product => ({
+      params: {
+        slug: product.slug,
+      },
+    })),
+    fallback: 'blocking',
+  }
+}
+
+export const getStaticProps = async (context: GetStaticPropsContext) => {
+  const ssg = createSSGHelpers({
+    router: appRouter,
+    ctx: createContext,
+    transformer: superjson,
+  })
+
+  const slug = context.params?.slug as string
+
+  await ssg.fetchQuery('product.bySlug', {
+    slug,
+  })
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+      slug,
+    },
+
+    revalidate: 60 * 60 * 24 * 7,
+  }
+}
+
+const Item: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  slug,
+}) => {
   const toast = useToast()
   const { onOpenCartDrawer } = useCartDrawer()
   const [quantity, setQuantity] = useState(1)
@@ -113,7 +156,6 @@ const Item: NextPage = () => {
 
                 <Button
                   w="full"
-                  type="submit"
                   colorScheme="purple"
                   isLoading={mutation.isLoading}
                   leftIcon={<MdOutlineAddShoppingCart />}
@@ -132,40 +174,6 @@ const Item: NextPage = () => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const products = await prisma.product.findMany()
-
-  return {
-    paths: products.map(product => ({
-      params: {
-        slug: product.slug,
-      },
-    })),
-    fallback: 'blocking',
-  }
-}
-
-export const getStaticProps: GetStaticProps = async context => {
-  const ssg = createSSGHelpers({
-    router: appRouter,
-    ctx: {},
-  })
-
-  const slug = context.params?.slug as string
-
-  await ssg.fetchQuery('product.bySlug', {
-    slug,
-  })
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-    },
-
-    revalidate: 60 * 60 * 24 * 7,
-  }
 }
 
 export default Item

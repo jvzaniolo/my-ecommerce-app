@@ -16,7 +16,7 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { supabase } from '~/server/supabase'
+import { supabase } from '~/server/db/supabase'
 import { trpc } from '~/utils/trpc'
 
 const checkoutFormSchema = z.object({
@@ -45,6 +45,24 @@ const checkoutFormSchema = z.object({
 })
 
 export type CheckoutFormSchema = z.infer<typeof checkoutFormSchema>
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const { data: user } = await supabase.auth.api.getUserByCookie(req)
+
+  if (!user) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/sign-in',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
 
 const Checkout: NextPage = () => {
   const toast = useToast()
@@ -167,24 +185,6 @@ const Checkout: NextPage = () => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { data: user } = await supabase.auth.api.getUserByCookie(req)
-
-  if (!user) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/sign-in',
-        permanent: false,
-      },
-    }
-  }
-
-  return {
-    props: {},
-  }
 }
 
 export default Checkout

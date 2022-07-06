@@ -1,31 +1,19 @@
 import * as trpc from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import * as trpcNext from '@trpc/server/adapters/next'
-import { supabase } from './supabase'
+import { prisma } from './db/prisma'
+import { supabase } from './db/supabase'
 
-export async function createContextInner(
-  _opts: trpcNext.CreateNextContextOptions
-) {
-  if (_opts.req.url?.includes('api/trpc/auth.create')) {
-    if (_opts.req.method === 'POST') {
-      supabase.auth.api.setAuthCookie(_opts.req, _opts.res)
-    }
+export async function createContext(opts: trpcNext.CreateNextContextOptions) {
+  const { req, res } = opts
+  const { user, token, error } = await supabase.auth.api.getUserByCookie(req)
 
-    if (_opts.req.method === 'DELETE') {
-      supabase.auth.api.deleteAuthCookie(_opts.req, _opts.res, {})
-    }
-  }
+  if (error)
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: error.message })
 
-  const { user } = await supabase.auth.api.getUserByCookie(_opts.req)
-
-  if (!user) throw new Error('User not found')
-
-  return { user }
+  return { req, res, user, authToken: token, prisma }
 }
 
-export type Context = trpc.inferAsyncReturnType<typeof createContextInner>
+type Context = trpc.inferAsyncReturnType<typeof createContext>
 
-export async function createContext(
-  opts: trpcNext.CreateNextContextOptions
-): Promise<Context> {
-  return await createContextInner(opts)
-}
+export const createRouter = () => trpc.router<Context>()

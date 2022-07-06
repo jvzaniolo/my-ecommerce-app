@@ -1,13 +1,13 @@
 import { z } from 'zod'
-import { createRouter } from '../createRouter'
-import { prisma } from '../prisma'
+import { createRouter } from '../context'
+import { prisma } from '../db/prisma'
 
 export const productRouter = createRouter()
   .query('all', {
     async resolve() {
       const products = await prisma.product.findMany()
 
-      return products.map(p => ({ ...p, createdAt: p.createdAt.toISOString() }))
+      return products
     },
   })
   .query('bySlug', {
@@ -19,8 +19,6 @@ export const productRouter = createRouter()
         where: { slug: input.slug },
       })
 
-      if (!product) throw new Error('Product not found')
-
-      return { ...product, createdAt: product.createdAt.toISOString() }
+      return product
     },
   })

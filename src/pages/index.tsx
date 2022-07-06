@@ -10,13 +10,33 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createSSGHelpers } from '@trpc/react/ssg'
-import { GetStaticProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import Head from 'next/head'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
+import superjson from 'superjson'
+import { createContext } from '~/server/context'
 import { appRouter } from '~/server/routers/_app'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
+
+export const getStaticProps = async () => {
+  const ssg = createSSGHelpers({
+    router: appRouter,
+    ctx: createContext,
+    transformer: superjson,
+  })
+
+  await ssg.fetchQuery('product.all')
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+    },
+
+    revalidate: 60 * 60 * 24 * 7, // 1 week
+  }
+}
 
 const Home: NextPage = () => {
   const { data: items, error } = trpc.useQuery(['product.all'])
@@ -80,23 +100,6 @@ const Home: NextPage = () => {
   if (error) return <>{error.message}</>
 
   return <>Loading...</>
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-  const ssg = createSSGHelpers({
-    router: appRouter,
-    ctx: {},
-  })
-
-  await ssg.fetchQuery('product.all')
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-    },
-
-    revalidate: 60 * 60 * 24 * 7,
-  }
 }
 
 export default Home

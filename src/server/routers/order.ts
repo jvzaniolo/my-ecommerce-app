@@ -1,15 +1,20 @@
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { Context } from '../context'
-import { createRouter } from '../createRouter'
-import { prisma } from '../prisma'
+import { createRouter } from '../context'
+import { prisma } from '../db/prisma'
 
 export const orderRouter = createRouter()
+  .middleware(({ ctx, next }) => {
+    if (!ctx.user) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
+    return next()
+  })
   .query('all', {
     async resolve({ ctx }) {
-      const { user } = ctx as Context
-
       const order = await prisma.order.findFirst({
-        where: { userId: user.id },
+        where: { userId: ctx.user?.id },
         include: {
           user: true,
           items: {
@@ -28,10 +33,8 @@ export const orderRouter = createRouter()
       id: z.string(),
     }),
     async resolve({ input, ctx }) {
-      const { user } = ctx as Context
-
       const order = await prisma.order.findFirst({
-        where: { userId: user.id, id: input.id },
+        where: { userId: ctx.user?.id, id: input.id },
         include: {
           user: true,
           items: {
@@ -56,11 +59,11 @@ export const orderRouter = createRouter()
       }),
     }),
     async resolve({ input, ctx }) {
-      const { user } = ctx as Context
+      if (!ctx.user) return
 
       const order = await prisma.order.create({
         data: {
-          userId: user.id,
+          userId: ctx.user.id,
           items: {
             createMany: {
               data: input.cart.items.map(i => ({

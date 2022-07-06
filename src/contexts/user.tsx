@@ -8,13 +8,13 @@ import {
   useState,
 } from 'react'
 import { InferQueryOutput } from '~/pages/api/trpc/[trpc]'
-import { supabase } from '~/server/supabase'
+import { supabase } from '~/server/db/supabase'
 import { trpc } from '~/utils/trpc'
 
 type User = InferQueryOutput<'user.byEmail'>
 
 type UserContextValue = {
-  user: User | undefined
+  user: User | null
   session: Session | null
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -26,9 +26,8 @@ const UserContext = createContext<UserContextValue | null>(null)
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const toast = useToast()
   const utils = trpc.useContext()
-  const [user, setUser] = useState<User | undefined>(undefined)
+  const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const query = trpc.useQuery(['user.byEmail', { email: session?.user?.email }])
   const createUser = trpc.useMutation(['user.create'])
 
   useEffect(() => {
@@ -88,9 +87,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     setSession(session)
 
-    await query.refetch()
+    const data = await utils.fetchQuery(['user.byEmail', { email }])
 
-    setUser(query.data)
+    setUser(data)
   }
 
   async function signOut() {
@@ -98,7 +97,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     if (error) return Promise.reject(error)
 
-    setUser(undefined)
+    utils.invalidateQueries('cart.all')
+
+    setUser(null)
     setSession(null)
   }
 

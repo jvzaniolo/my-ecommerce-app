@@ -18,7 +18,7 @@ import Head from 'next/head'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
-import { supabase } from '~/server/supabase'
+import { supabase } from '~/server/db/supabase'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
 
