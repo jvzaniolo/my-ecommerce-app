@@ -7,6 +7,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { supabaseClient } from '@supabase/auth-helpers-nextjs'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -14,7 +15,6 @@ import { useRouter } from 'next/router'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Input } from '~/components/input'
-import { useUser } from '~/contexts/user'
 
 const signUpSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Email is invalid'),
@@ -35,13 +35,12 @@ const SignIn: NextPage = () => {
   })
   const router = useRouter()
   const toast = useToast()
-  const { signIn } = useUser()
 
   const onSignIn: SubmitHandler<SignUpFormData> = async data => {
     try {
       const { email, password } = data
 
-      await signIn(email, password)
+      await supabaseClient.auth.signIn({ email, password })
 
       router.push('/')
     } catch (error: any) {

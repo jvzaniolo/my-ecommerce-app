@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { createRouter } from '../context'
+import { prisma } from '../db/prisma'
 
 export const cartRouter = createRouter()
   .middleware(({ ctx, next }) => {
@@ -12,7 +13,7 @@ export const cartRouter = createRouter()
   })
   .query('all', {
     async resolve({ ctx }) {
-      const cart = await ctx.prisma.cart.findFirst({
+      const cart = await prisma.cart.findFirst({
         where: { userId: ctx.user?.id },
         include: { items: { include: { product: true } } },
         orderBy: { createdAt: 'desc' },
@@ -27,18 +28,18 @@ export const cartRouter = createRouter()
       quantity: z.number(),
     }),
     async resolve({ input, ctx }) {
-      const cart = await ctx.prisma.cart.findFirst({
+      const cart = await prisma.cart.findFirst({
         where: { userId: ctx.user?.id },
         select: { id: true },
       })
 
-      const hasCartItem = await ctx.prisma.cartItem.findFirst({
+      const hasCartItem = await prisma.cartItem.findFirst({
         where: { productId: input.productId, cartId: cart?.id },
         select: { id: true, quantity: true },
       })
 
       if (hasCartItem) {
-        const updatedCart = await ctx.prisma.cart.update({
+        const updatedCart = await prisma.cart.update({
           where: { userId: ctx.user?.id },
           data: {
             items: {
@@ -54,7 +55,7 @@ export const cartRouter = createRouter()
         return updatedCart
       }
 
-      const updatedCart = await ctx.prisma.cart.update({
+      const updatedCart = await prisma.cart.update({
         where: { userId: ctx.user?.id },
         data: {
           items: {
@@ -76,7 +77,7 @@ export const cartRouter = createRouter()
       quantity: z.number().min(1),
     }),
     async resolve({ input, ctx }) {
-      const cart = await ctx.prisma.cart.update({
+      const cart = await prisma.cart.update({
         where: { userId: ctx.user?.id },
         data: {
           items: {
@@ -97,7 +98,7 @@ export const cartRouter = createRouter()
       itemId: z.string(),
     }),
     async resolve({ input, ctx }) {
-      const cart = await ctx.prisma.cart.update({
+      const cart = await prisma.cart.update({
         where: { userId: ctx.user?.id },
         data: {
           items: {

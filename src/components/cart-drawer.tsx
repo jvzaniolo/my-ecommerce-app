@@ -14,12 +14,12 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
+import { useUser } from '@supabase/auth-helpers-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { useUser } from '~/contexts/user'
 import { InferQueryOutput } from '~/pages/api/trpc/[trpc]'
 import { toUSCurrency } from '~/utils/format'
 import { trpc } from '~/utils/trpc'
@@ -94,9 +94,9 @@ export const CartDrawer: FC<{
   onClose: () => void
 }> = ({ isOpen, onClose }) => {
   const router = useRouter()
-  const { session } = useUser()
+  const { user } = useUser()
   const { onCloseCartDrawer } = useCartDrawer()
-  const { data: cart, error } = trpc.useQuery(['cart.all'])
+  const { data: cart, error } = trpc.useQuery(['cart.all'], { enabled: !!user })
   const removeItem = useRemoveCartItemMutation()
   const updateItemQuantity = useUpdateCartItemMutation()
 
@@ -165,7 +165,7 @@ export const CartDrawer: FC<{
               )
             ) : (
               <Text>
-                {session ? (
+                {user ? (
                   'Loading...'
                 ) : (
                   <Link href="/sign-in" passHref>

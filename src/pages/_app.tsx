@@ -1,17 +1,18 @@
 import { ChakraProvider } from '@chakra-ui/react'
+import { supabaseClient } from '@supabase/auth-helpers-nextjs'
+import { UserProvider } from '@supabase/auth-helpers-react'
 import { withTRPC } from '@trpc/next'
 import { AppProps } from 'next/app'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import superjson from 'superjson'
 import { Layout } from '~/components/layout'
 import { CartDrawerProvider } from '~/contexts/cart-drawer'
-import { UserProvider } from '~/contexts/user'
 import { AppRouter } from '~/server/routers/_app'
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <ChakraProvider>
-      <UserProvider>
+      <UserProvider supabaseClient={supabaseClient}>
         <CartDrawerProvider>
           <Layout>
             <Component {...pageProps} />

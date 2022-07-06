@@ -8,6 +8,7 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { withPageAuth } from '@supabase/auth-helpers-nextjs'
 import { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -16,7 +17,6 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { supabase } from '~/server/db/supabase'
 import { trpc } from '~/utils/trpc'
 
 const checkoutFormSchema = z.object({
@@ -46,23 +46,9 @@ const checkoutFormSchema = z.object({
 
 export type CheckoutFormSchema = z.infer<typeof checkoutFormSchema>
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { data: user } = await supabase.auth.api.getUserByCookie(req)
-
-  if (!user) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/sign-in',
-        permanent: false,
-      },
-    }
-  }
-
-  return {
-    props: {},
-  }
-}
+export const getServerSideProps: GetServerSideProps = withPageAuth({
+  redirectTo: '/sign-in',
+})
 
 const Checkout: NextPage = () => {
   const toast = useToast()
@@ -88,7 +74,7 @@ const Checkout: NextPage = () => {
           onSuccess(data) {
             utils.invalidateQueries(['cart.all'])
 
-            router.push(`/orders/${data.id}`)
+            router.push(`/orders/${data?.id}`)
           },
           onError(error) {
             toast({

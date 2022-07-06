@@ -1,6 +1,6 @@
 {
-  "cSpell.words": ["hookform", "superjson", "testid", "trpc"],
-  "editor.foldingImportsByDefault": true,
+  "cSpell.words": ["hookform", "nextjs", "superjson", "testid", "trpc"],
+  // "editor.foldingImportsByDefault": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   }

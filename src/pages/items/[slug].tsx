@@ -76,9 +76,9 @@ const Item: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   const toast = useToast()
   const { onOpenCartDrawer } = useCartDrawer()
   const [quantity, setQuantity] = useState(1)
-  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }])
   const utils = trpc.useContext()
   const mutation = trpc.useMutation(['cart.add-item'])
+  const { data: item, error } = trpc.useQuery(['product.bySlug', { slug }])
 
   function onAddToCart() {
     if (!item) return
@@ -93,10 +93,11 @@ const Item: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
           await utils.refetchQueries(['cart.all'])
           onOpenCartDrawer()
         },
-        onError() {
+        onError(error) {
           toast({
             title: 'Error while adding to cart',
-            description: `${item.name} was not added to your cart`,
+            description:
+              error.message || `${item.name} was not added to your cart`,
             status: 'error',
             duration: 5000,
             isClosable: true,

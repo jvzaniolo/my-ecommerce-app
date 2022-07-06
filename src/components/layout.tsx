@@ -10,14 +10,15 @@ import {
   Spacer,
   Text,
 } from '@chakra-ui/react'
+import { supabaseClient } from '@supabase/auth-helpers-nextjs'
+import { useUser } from '@supabase/auth-helpers-react'
 import Link from 'next/link'
 import { FC, ReactNode } from 'react'
 import { MdOutlineShoppingCart } from 'react-icons/md'
 import { useCartDrawer } from '~/contexts/cart-drawer'
-import { useUser } from '~/contexts/user'
 
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const { session, signOut } = useUser()
+  const { user } = useUser()
   const { onOpenCartDrawer } = useCartDrawer()
 
   return (
@@ -47,8 +48,11 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
                 icon={<MdOutlineShoppingCart />}
               />
 
-              {session ? (
-                <Button colorScheme="purple" onClick={() => signOut()}>
+              {user ? (
+                <Button
+                  colorScheme="purple"
+                  onClick={() => supabaseClient.auth.signOut()}
+                >
                   Sign Out
                 </Button>
               ) : (
