@@ -14,8 +14,8 @@ import Image from 'next/image'
 import NextLink from 'next/link'
 import { OrderSummary } from '~/components/order-summary'
 import { Quantity } from '~/components/quantity'
+import { trpc } from '~/lib/trpc'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 
 /**
  * @deprecated

@@ -1,7 +1,7 @@
 import { Box, Divider, Flex, Heading, Stack, Text } from '@chakra-ui/react'
 import { FC, ReactNode } from 'react'
+import { trpc } from '~/lib/trpc'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 
 export const OrderSummary: FC<{ children: ReactNode }> = ({ children }) => {
   const { data: cart, error } = trpc.useQuery(['cart.all'])

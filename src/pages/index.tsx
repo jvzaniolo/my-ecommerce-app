@@ -15,10 +15,10 @@ import Head from 'next/head'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import superjson from 'superjson'
+import { trpc } from '~/lib/trpc'
 import { createContext } from '~/server/context'
 import { appRouter } from '~/server/routers/_app'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 
 export const getStaticProps = async () => {
   const ssg = createSSGHelpers({

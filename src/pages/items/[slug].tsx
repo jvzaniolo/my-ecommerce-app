@@ -28,11 +28,11 @@ import { MdOutlineAddShoppingCart } from 'react-icons/md'
 import superjson from 'superjson'
 import { Quantity } from '~/components/quantity'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { prisma } from '~/lib/prisma'
+import { trpc } from '~/lib/trpc'
 import { createContext } from '~/server/context'
-import { prisma } from '~/server/db/prisma'
 import { appRouter } from '~/server/routers/_app'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const products = await prisma.product.findMany()
@@ -50,7 +50,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps = async (context: GetStaticPropsContext) => {
   const ssg = createSSGHelpers({
     router: appRouter,
-    ctx: createContext,
+    ctx: await createContext(context),
     transformer: superjson,
   })
 

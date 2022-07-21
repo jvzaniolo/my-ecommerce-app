@@ -1,6 +1,6 @@
 import { z } from 'zod'
+import { prisma } from '~/lib/prisma'
 import { createRouter } from '../context'
-import { prisma } from '../db/prisma'
 
 export const productRouter = createRouter()
   .query('all', {

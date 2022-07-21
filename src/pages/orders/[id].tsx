@@ -19,8 +19,8 @@ import Head from 'next/head'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { MdChevronLeft } from 'react-icons/md'
+import { trpc } from '~/lib/trpc'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 
 export const getServerSideProps = withPageAuth({ redirectTo: '/sign-in' })
 

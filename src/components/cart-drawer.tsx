@@ -20,9 +20,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { useCartDrawer } from '~/contexts/cart-drawer'
+import { trpc } from '~/lib/trpc'
 import { InferQueryOutput } from '~/pages/api/trpc/[trpc]'
 import { toUSCurrency } from '~/utils/format'
-import { trpc } from '~/utils/trpc'
 import { Quantity } from './quantity'
 
 type Cart = InferQueryOutput<'cart.all'>

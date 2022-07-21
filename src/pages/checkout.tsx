@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { Input } from '~/components/input'
 import { OrderSummary } from '~/components/order-summary'
 import { ShippingForm } from '~/components/shipping-form'
-import { trpc } from '~/utils/trpc'
+import { trpc } from '~/lib/trpc'
 
 const checkoutFormSchema = z.object({
   shipping: z.object({
